@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "dl-lecture-notes"
+  site-url: "https://sayan.github.io/dl-lecture-notes"
+  description: "My notes around ml/dl"
+  repo-branch: main
+  repo-url: "https://github.com/sayan/dl-lecture-notes"
