@@ -29,14 +29,49 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this site"
+    "text": "Welcome to my lecture notes repository on Deep Learning (DL) and Machine Learning (ML). This site is designed to serve as a comprehensive resource for students, professionals, and enthusiasts interested in exploring the vast and exciting fields of DL and ML."
+  },
+  {
+    "objectID": "about.html#who-am-i",
+    "href": "about.html#who-am-i",
+    "title": "About",
+    "section": "Who Am I?",
+    "text": "Who Am I?\nMy name is Sayan Dasgupta. I am currently working as a Principal Data Scientist, with a robust background in mathematics, classical statistics, and machine learning. As I continue to explore and delve deeper into the field of Deep Learning, I aim to leverage my knowledge and experience to share insights and foster learning within the community."
+  },
+  {
+    "objectID": "about.html#purpose-of-this-site",
+    "href": "about.html#purpose-of-this-site",
+    "title": "About",
+    "section": "Purpose of This Site",
+    "text": "Purpose of This Site\nThis site is a curated collection of lecture notes, resources, and insights gathered from various courses, seminars, and self-study sessions. The primary aim is to provide a structured and easy-to-follow guide for anyone looking to understand and apply concepts in DL and ML. Whether you’re a beginner or someone looking to deepen your understanding, you’ll find valuable information here."
+  },
+  {
+    "objectID": "about.html#what-youll-find-here",
+    "href": "about.html#what-youll-find-here",
+    "title": "About",
+    "section": "What You’ll Find Here",
+    "text": "What You’ll Find Here\n\nLecture Notes: Detailed notes from various courses and lectures on DL and ML topics, including but not limited to neural networks, deep learning algorithms, supervised and unsupervised learning, reinforcement learning, and more.\nAnimated Graphs: Visual aids created using Manim to help conceptualize and understand complex topics. These animations bring theoretical concepts to life, making them easier to grasp.\nCode Examples: Practical code snippets and examples, primarily using Python, to demonstrate how theoretical concepts are implemented in real-world scenarios.\nQuarto Projects: Interactive Quarto projects that you can explore and modify to enhance your learning experience.\nAdditional Resources: Links to research papers, articles, books, and online courses that I have found particularly useful."
+  },
+  {
+    "objectID": "about.html#why-i-created-this-site",
+    "href": "about.html#why-i-created-this-site",
+    "title": "About",
+    "section": "Why I Created This Site",
+    "text": "Why I Created This Site\nI believe in the power of shared knowledge and the importance of making education accessible to all. By compiling and organizing my notes and resources, I hope to contribute to the learning community and provide a useful tool for anyone passionate about DL and ML."
+  },
+  {
+    "objectID": "about.html#get-in-touch",
+    "href": "about.html#get-in-touch",
+    "title": "About",
+    "section": "Get in Touch",
+    "text": "Get in Touch\nI welcome feedback, questions, and collaboration opportunities. If you have any suggestions or would like to discuss anything related to the content on this site, feel free to reach out to me.\nThank you for visiting, and happy learning!"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Home",
     "section": "",
-    "text": "Hello, World!\nWelcome to the Hello Quarto website."
+    "text": "Hello from Sayan\nThis site serves as a curated collection of my understanding of different concepts in DL and ML, gathered from various courses, seminars, and self-study sessions. The primary aim is to provide a structured and easy-to-follow guide for anyone looking to understand and apply concepts in DL and ML. Whether you’re a beginner or someone looking to deepen your understanding, you’ll find valuable information here."
   },
   {
     "objectID": "neural_network_and_deep_learning/week_2/w2_gradient_descent.html",

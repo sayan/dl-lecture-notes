@@ -3,6 +3,6 @@ title: "Home"
 sidebar: true
 ---
 
-# Hello, World!
+# Hello from Sayan
 
-Welcome to the Hello Quarto website.
+This site serves as a curated collection of my understanding of different concepts in DL and ML, gathered from various courses, seminars, and self-study sessions. The primary aim is to provide a structured and easy-to-follow guide for anyone looking to understand and apply concepts in DL and ML. Whether you're a beginner or someone looking to deepen your understanding, you'll find valuable information here.

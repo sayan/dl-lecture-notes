@@ -2,4 +2,33 @@
 title: "About"
 ---
 
-About this site
+Welcome to my lecture notes repository on Deep Learning (DL) and Machine Learning (ML). This site is designed to serve as a comprehensive resource for students, professionals, and enthusiasts interested in exploring the vast and exciting fields of DL and ML.
+
+## Who Am I?
+
+My name is Sayan Dasgupta. I am currently working as a Principal Data Scientist, with a robust background in mathematics, classical statistics, and machine learning. As I continue to explore and delve deeper into the field of Deep Learning, I aim to leverage my knowledge and experience to share insights and foster learning within the community.
+
+
+## Purpose of This Site
+
+This site is a curated collection of lecture notes, resources, and insights gathered from various courses, seminars, and self-study sessions. The primary aim is to provide a structured and easy-to-follow guide for anyone looking to understand and apply concepts in DL and ML. Whether you're a beginner or someone looking to deepen your understanding, you'll find valuable information here.
+
+
+## What You’ll Find Here
+
+- **Lecture Notes**: Detailed notes from various courses and lectures on DL and ML topics, including but not limited to neural networks, deep learning algorithms, supervised and unsupervised learning, reinforcement learning, and more.
+- **Animated Graphs**: Visual aids created using Manim to help conceptualize and understand complex topics. These animations bring theoretical concepts to life, making them easier to grasp.
+- **Code Examples**: Practical code snippets and examples, primarily using Python, to demonstrate how theoretical concepts are implemented in real-world scenarios.
+- **Quarto Projects**: Interactive Quarto projects that you can explore and modify to enhance your learning experience.
+- **Additional Resources**: Links to research papers, articles, books, and online courses that I have found particularly useful.
+
+## Why I Created This Site
+
+I believe in the power of shared knowledge and the importance of making education accessible to all. By compiling and organizing my notes and resources, I hope to contribute to the learning community and provide a useful tool for anyone passionate about DL and ML.
+
+## Get in Touch
+
+I welcome feedback, questions, and collaboration opportunities. If you have any suggestions or would like to discuss anything related to the content on this site, feel free to reach out to me.
+
+Thank you for visiting, and happy learning!
+
