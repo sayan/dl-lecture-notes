@@ -1,0 +1,49 @@
+project:
+  type: website
+  output-dir: docs
+  resources: 
+    - media/
+
+website:
+  title: "Deep Learning Notes"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: neural_network_and_deep_learning/week_2/w2_binary_classification.qmd
+        text: Lecture notes
+      - href: about.qmd
+        text: About
+
+  sidebar: 
+    - title: "NN and DL lecture notes"
+      style: "docked"
+      background: light
+      contents:
+        - section: "Neural Network and DL"
+          contents: 
+            - section: "Neural Network Basics"
+              contents: 
+              - href: neural_network_and_deep_learning/week_2/w2_binary_classification.qmd
+                text: "Binary Classification"
+              - href: neural_network_and_deep_learning/week_2/w2_logistic_regression.ipynb
+                text: "Logistic Regression"
+              - href: neural_network_and_deep_learning/week_2/w2_logistic_regression_cost_function.ipynb
+                text: "Logistic Regression Cost Function"
+              - href: neural_network_and_deep_learning/week_2/w2_gradient_descent.ipynb
+                text: "Gradient Descent"
+        - section: "Deep Learning"
+          contents: 
+            - href: neural_network_and_deep_learning/week_2/test_notebook.ipynb
+              text: ""
+
+        # - href: tutorial.qmd
+        #   text: "Tutorial"
+        # - href: test.qmd
+        #   text: "Test"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true

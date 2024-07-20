@@ -1,0 +1,43 @@
+---
+title: "Binary Classification"
+date: "12-Jun-2024"
+---
+
+
+#### Logistic Regression
+
+Input Feature matrix $X$ and target vector $Y$.
+
+
+$X = [x_1 ... x_{n_x}]$
+
+
+NB: $n_x$  Represents the number of features. For example if its a colored image then the dimension of feature fector is `64 * 64 * 3`
+
+#### Notations to be followed in this notebook
+
+- Observations: $(x,y)$ where $x \in \mathbb{R}^{n_x}$  and $y \in {0,1}$
+- Number of training examples: $m$
+- $m$ Training examples are denoted by $(x^{(1)},y^{(1)})...(x^{(m)},y^{(m)})$
+- $M_{train}$ is the number of examples training set and $M_{test}$ is the number of examples in test set
+- $X = [x^{(1)} ... x^{(m)}]$ is the matrix of input features. Note we have m columns and n_x rows. where m represents the number of training examples and n_x represents the number of features.
+
+::: {.callout-tip title="Feature Matrix"}
+$$
+X_{n_{x} \times m} =
+\begin{pmatrix}
+    & & & \\
+    \vdots & \vdots & & \vdots \\
+    x^{(1)} & x^{(2)} & \cdots & x^{(m)} \\
+    \vdots & \vdots & & \vdots \\
+    & & & \\
+\end{pmatrix}
+$$
+and $Y = [y^{(1)} ... y^{(m)}]$ is the target vector where $Y \in \mathbb{R^{1 \times m}}$
+:::
+
+::: {.callout-caution icon=false}
+#### Note
+Way we have defined the input feature matrix $X$ is different from the way we define in traditional statistical courses of linear regression. In linear regression we have $X = [x_1 ... x_{n_x}]$ where $x_i$ is the feature vector of $i^{th}$ feature. We formulate the problem as $Y_{m \times 1} = X_{m \times n_{x}}\beta_{n_{x} \times 1} + \epsilon_{m\times1}$. $\beta$ estimates are formulated as $\hat{\beta} = (X^{T}X)^{-1}X^{T}Y$. But here the convection we will follow is $X = [x^{(1)} ... x^{(m)}]$ where $x^{(i)}$ is the feature vector of $i^{th}$ training example.
+:::
+

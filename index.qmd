@@ -1,0 +1,8 @@
+---
+title: "Home"
+sidebar: true
+---
+
+# Hello, World!
+
+Welcome to the Hello Quarto website.
