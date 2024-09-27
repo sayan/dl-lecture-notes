@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.43">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Deep Learning Notes – pytorch_quickstart</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Deep Learning Notes</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../neural_network_and_deep_learning/week_2/w2_binary_classification.html"> 
+<span class="menu-text">Lecture notes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+
+<div id="cell-0" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> TensorDataset, DataLoader, Dataset</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.transforms <span class="im">import</span> ToTensor</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-1" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get cpu, gpu or mps device for training.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> (</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cuda"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.cuda.is_available()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"mps"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.backends.mps.is_available()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Using </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss"> device"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using mps device</code></pre>
+</div>
+</div>
+<div id="cell-2" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download training data from open datasets.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>training_data <span class="op">=</span> datasets.FashionMNIST(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    root<span class="op">=</span><span class="st">"data"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    train<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    download<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">=</span>ToTensor(),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Download test data from open datasets.</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>test_data <span class="op">=</span> datasets.FashionMNIST(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    root<span class="op">=</span><span class="st">"data"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    train<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    download<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">=</span>ToTensor(),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-3" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>image, label <span class="op">=</span> training_data[<span class="dv">0</span>]  <span class="co"># 0th image</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-4" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Length of the training dataset </span><span class="sc">{</span><span class="bu">len</span>(training_data)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>image.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Length of the training dataset 60000</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>torch.Size([1, 28, 28])</code></pre>
+</div>
+</div>
+<div id="cell-5" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>image_np <span class="op">=</span> image.squeeze(dim<span class="op">=</span><span class="dv">0</span>).numpy()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.imshow(image_np, cmap<span class="op">=</span><span class="st">"gray"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Label: </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_pytorch_quickstart_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-6" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">64</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Create data loaders.</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>train_dataloader <span class="op">=</span> DataLoader(training_data, batch_size<span class="op">=</span>batch_size)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>test_dataloader <span class="op">=</span> DataLoader(test_data, batch_size<span class="op">=</span>batch_size)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> X, y <span class="kw">in</span> test_dataloader:</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Shape of X [N, C, H, W]: </span><span class="sc">{</span>X<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Shape of y: </span><span class="sc">{</span>y<span class="sc">.</span>shape<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>y<span class="sc">.</span>dtype<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Shape of X [N, C, H, W]: torch.Size([64, 1, 28, 28])
+Shape of y: torch.Size([64]) torch.int64</code></pre>
+</div>
+</div>
+<div id="cell-7" class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define model</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NeuralNetwork(nn.Module):</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.flatten <span class="op">=</span> nn.Flatten(start_dim <span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear_relu_stack <span class="op">=</span> nn.Sequential(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">28</span><span class="op">*</span><span class="dv">28</span>, <span class="dv">512</span>),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(<span class="fl">0.25</span>),</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">512</span>, <span class="dv">512</span>),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">512</span>, <span class="dv">10</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(f"Size of input Tensor {x.shape}")</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.flatten(x)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(f"After Flatten: {x.shape}")</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.linear_relu_stack(x)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> NeuralNetwork().to(device)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NeuralNetwork(
+  (flatten): Flatten(start_dim=1, end_dim=-1)
+  (linear_relu_stack): Sequential(
+    (0): Linear(in_features=784, out_features=512, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): Linear(in_features=512, out_features=512, bias=True)
+    (4): ReLU()
+    (5): Linear(in_features=512, out_features=10, bias=True)
+  )
+)</code></pre>
+</div>
+</div>
+<div id="cell-8" class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-9" class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(dataloader, model, loss_fn, optimizer):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> batch, (X, y) <span class="kw">in</span> <span class="bu">enumerate</span>(dataloader):</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        X, y <span class="op">=</span> X.to(device), y.to(device)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute prediction error</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> model(X)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(pred, y)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Backpropagation</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> batch <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>            loss, current <span class="op">=</span> loss.item(), (batch <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> <span class="bu">len</span>(X)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"loss: </span><span class="sc">{</span>loss<span class="sc">:&gt;7f}</span><span class="ss">  [</span><span class="sc">{</span>current<span class="sc">:&gt;5d}</span><span class="ss">/</span><span class="sc">{</span>size<span class="sc">:&gt;5d}</span><span class="ss">]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-10" class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test(dataloader, model, loss_fn):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    num_batches <span class="op">=</span> <span class="bu">len</span>(dataloader)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    test_loss, correct <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>            X, y <span class="op">=</span> X.to(device), y.to(device)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>            pred <span class="op">=</span> model(X)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>            test_loss <span class="op">+=</span> loss_fn(pred, y).item()</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>            correct <span class="op">+=</span> (pred.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">type</span>(torch.<span class="bu">float</span>).<span class="bu">sum</span>().item()</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    test_loss <span class="op">/=</span> num_batches</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">/=</span> size</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Test Error: </span><span class="ch">\n</span><span class="ss"> Accuracy: </span><span class="sc">{</span>(<span class="dv">100</span><span class="op">*</span>correct)<span class="sc">:&gt;0.1f}</span><span class="ss">%, Avg loss: </span><span class="sc">{</span>test_loss<span class="sc">:&gt;8f}</span><span class="ss"> </span><span class="ch">\n</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-11" class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>t<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ch">\n</span><span class="ss">-------------------------------"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    train(train_dataloader, model, loss_fn, optimizer)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    test(test_dataloader, model, loss_fn)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Done!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch 1
+-------------------------------
+loss: 2.298296  [   64/60000]
+loss: 2.282213  [ 6464/60000]
+loss: 2.266148  [12864/60000]
+loss: 2.263077  [19264/60000]
+loss: 2.268831  [25664/60000]
+loss: 2.225084  [32064/60000]
+loss: 2.245842  [38464/60000]
+loss: 2.199167  [44864/60000]
+loss: 2.205921  [51264/60000]
+loss: 2.186027  [57664/60000]
+Test Error: 
+ Accuracy: 36.4%, Avg loss: 2.163777 
+
+Epoch 2
+-------------------------------
+loss: 2.181344  [   64/60000]
+loss: 2.166702  [ 6464/60000]
+loss: 2.114061  [12864/60000]
+loss: 2.139325  [19264/60000]
+loss: 2.099915  [25664/60000]
+loss: 2.035254  [32064/60000]
+loss: 2.087618  [38464/60000]
+loss: 2.000578  [44864/60000]
+loss: 2.002508  [51264/60000]
+loss: 1.950973  [57664/60000]
+Test Error: 
+ Accuracy: 56.1%, Avg loss: 1.915715 
+
+Epoch 3
+-------------------------------
+loss: 1.960988  [   64/60000]
+loss: 1.924359  [ 6464/60000]
+loss: 1.854146  [12864/60000]
+loss: 1.860061  [19264/60000]
+loss: 1.766131  [25664/60000]
+loss: 1.724658  [32064/60000]
+loss: 1.747804  [38464/60000]
+loss: 1.640125  [44864/60000]
+loss: 1.671738  [51264/60000]
+loss: 1.570330  [57664/60000]
+Test Error: 
+ Accuracy: 61.6%, Avg loss: 1.545847 
+
+Epoch 4
+-------------------------------
+loss: 1.631749  [   64/60000]
+loss: 1.592189  [ 6464/60000]
+loss: 1.474233  [12864/60000]
+loss: 1.525604  [19264/60000]
+loss: 1.430795  [25664/60000]
+loss: 1.385079  [32064/60000]
+loss: 1.415063  [38464/60000]
+loss: 1.330629  [44864/60000]
+loss: 1.366863  [51264/60000]
+loss: 1.258173  [57664/60000]
+Test Error: 
+ Accuracy: 63.3%, Avg loss: 1.265006 
+
+Epoch 5
+-------------------------------
+loss: 1.375588  [   64/60000]
+loss: 1.334530  [ 6464/60000]
+loss: 1.181517  [12864/60000]
+loss: 1.300183  [19264/60000]
+loss: 1.192963  [25664/60000]
+loss: 1.189192  [32064/60000]
+loss: 1.233815  [38464/60000]
+loss: 1.134293  [44864/60000]
+loss: 1.197205  [51264/60000]
+loss: 1.101940  [57664/60000]
+Test Error: 
+ Accuracy: 64.7%, Avg loss: 1.092474 
+
+Epoch 6
+-------------------------------
+loss: 1.196014  [   64/60000]
+loss: 1.213762  [ 6464/60000]
+loss: 1.018933  [12864/60000]
+loss: 1.146462  [19264/60000]
+loss: 1.021540  [25664/60000]
+loss: 1.032592  [32064/60000]
+loss: 1.116143  [38464/60000]
+loss: 1.023080  [44864/60000]
+loss: 1.052058  [51264/60000]
+loss: 1.003589  [57664/60000]
+Test Error: 
+ Accuracy: 65.6%, Avg loss: 0.983323 
+
+Epoch 7
+-------------------------------
+loss: 1.081786  [   64/60000]
+loss: 1.118868  [ 6464/60000]
+loss: 0.879458  [12864/60000]
+loss: 1.042356  [19264/60000]
+loss: 0.893699  [25664/60000]
+loss: 0.976261  [32064/60000]
+loss: 0.957645  [38464/60000]
+loss: 0.950382  [44864/60000]
+loss: 0.975640  [51264/60000]
+loss: 0.922089  [57664/60000]
+Test Error: 
+ Accuracy: 66.8%, Avg loss: 0.910578 
+
+Epoch 8
+-------------------------------
+loss: 0.970003  [   64/60000]
+loss: 1.023136  [ 6464/60000]
+loss: 0.825816  [12864/60000]
+loss: 1.031218  [19264/60000]
+loss: 0.866112  [25664/60000]
+loss: 0.855157  [32064/60000]
+loss: 0.955455  [38464/60000]
+loss: 0.937556  [44864/60000]
+loss: 0.965490  [51264/60000]
+loss: 0.880244  [57664/60000]
+Test Error: 
+ Accuracy: 68.0%, Avg loss: 0.859537 
+
+Epoch 9
+-------------------------------
+loss: 0.901527  [   64/60000]
+loss: 0.990419  [ 6464/60000]
+loss: 0.742971  [12864/60000]
+loss: 0.980194  [19264/60000]
+loss: 0.843835  [25664/60000]
+loss: 0.854469  [32064/60000]
+loss: 0.946432  [38464/60000]
+loss: 0.901446  [44864/60000]
+loss: 0.880539  [51264/60000]
+loss: 0.808153  [57664/60000]
+Test Error: 
+ Accuracy: 69.0%, Avg loss: 0.821849 
+
+Epoch 10
+-------------------------------
+loss: 0.853238  [   64/60000]
+loss: 0.932680  [ 6464/60000]
+loss: 0.702776  [12864/60000]
+loss: 0.933771  [19264/60000]
+loss: 0.807236  [25664/60000]
+loss: 0.803624  [32064/60000]
+loss: 0.906728  [38464/60000]
+loss: 0.864268  [44864/60000]
+loss: 0.856516  [51264/60000]
+loss: 0.805792  [57664/60000]
+Test Error: 
+ Accuracy: 70.0%, Avg loss: 0.792234 
+
+Epoch 11
+-------------------------------
+loss: 0.813779  [   64/60000]
+loss: 0.863903  [ 6464/60000]
+loss: 0.668801  [12864/60000]
+loss: 0.878438  [19264/60000]
+loss: 0.772139  [25664/60000]
+loss: 0.773446  [32064/60000]
+loss: 0.852162  [38464/60000]
+loss: 0.880208  [44864/60000]
+loss: 0.793738  [51264/60000]
+loss: 0.768993  [57664/60000]
+Test Error: 
+ Accuracy: 71.0%, Avg loss: 0.767975 
+
+Epoch 12
+-------------------------------
+loss: 0.770365  [   64/60000]
+loss: 0.865316  [ 6464/60000]
+loss: 0.666259  [12864/60000]
+loss: 0.812501  [19264/60000]
+loss: 0.768294  [25664/60000]
+loss: 0.754508  [32064/60000]
+loss: 0.829981  [38464/60000]
+loss: 0.821262  [44864/60000]
+loss: 0.800309  [51264/60000]
+loss: 0.740091  [57664/60000]
+Test Error: 
+ Accuracy: 72.3%, Avg loss: 0.747186 
+
+Epoch 13
+-------------------------------
+loss: 0.789585  [   64/60000]
+loss: 0.819980  [ 6464/60000]
+loss: 0.597671  [12864/60000]
+loss: 0.799215  [19264/60000]
+loss: 0.749160  [25664/60000]
+loss: 0.727265  [32064/60000]
+loss: 0.790014  [38464/60000]
+loss: 0.760097  [44864/60000]
+loss: 0.831657  [51264/60000]
+loss: 0.712645  [57664/60000]
+Test Error: 
+ Accuracy: 73.3%, Avg loss: 0.728866 
+
+Epoch 14
+-------------------------------
+loss: 0.717295  [   64/60000]
+loss: 0.801778  [ 6464/60000]
+loss: 0.598143  [12864/60000]
+loss: 0.837110  [19264/60000]
+loss: 0.731961  [25664/60000]
+loss: 0.732344  [32064/60000]
+loss: 0.779369  [38464/60000]
+loss: 0.739902  [44864/60000]
+loss: 0.755351  [51264/60000]
+loss: 0.701263  [57664/60000]
+Test Error: 
+ Accuracy: 74.2%, Avg loss: 0.712342 
+
+Epoch 15
+-------------------------------
+loss: 0.678608  [   64/60000]
+loss: 0.835714  [ 6464/60000]
+loss: 0.556177  [12864/60000]
+loss: 0.771743  [19264/60000]
+loss: 0.705848  [25664/60000]
+loss: 0.681211  [32064/60000]
+loss: 0.783069  [38464/60000]
+loss: 0.795003  [44864/60000]
+loss: 0.758296  [51264/60000]
+loss: 0.740307  [57664/60000]
+Test Error: 
+ Accuracy: 74.9%, Avg loss: 0.697342 
+
+Epoch 16
+-------------------------------
+loss: 0.683619  [   64/60000]
+loss: 0.755973  [ 6464/60000]
+loss: 0.554527  [12864/60000]
+loss: 0.758081  [19264/60000]
+loss: 0.698933  [25664/60000]
+loss: 0.674997  [32064/60000]
+loss: 0.804926  [38464/60000]
+loss: 0.721176  [44864/60000]
+loss: 0.765750  [51264/60000]
+loss: 0.683950  [57664/60000]
+Test Error: 
+ Accuracy: 75.3%, Avg loss: 0.683126 
+
+Epoch 17
+-------------------------------
+loss: 0.674869  [   64/60000]
+loss: 0.768249  [ 6464/60000]
+loss: 0.535483  [12864/60000]
+loss: 0.752313  [19264/60000]
+loss: 0.707287  [25664/60000]
+loss: 0.674747  [32064/60000]
+loss: 0.789734  [38464/60000]
+loss: 0.733495  [44864/60000]
+loss: 0.747153  [51264/60000]
+loss: 0.686336  [57664/60000]
+Test Error: 
+ Accuracy: 76.1%, Avg loss: 0.670068 
+
+Epoch 18
+-------------------------------
+loss: 0.651914  [   64/60000]
+loss: 0.784361  [ 6464/60000]
+loss: 0.469537  [12864/60000]
+loss: 0.735958  [19264/60000]
+loss: 0.659753  [25664/60000]
+loss: 0.670088  [32064/60000]
+loss: 0.747228  [38464/60000]
+loss: 0.693825  [44864/60000]
+loss: 0.666039  [51264/60000]
+loss: 0.660554  [57664/60000]
+Test Error: 
+ Accuracy: 76.9%, Avg loss: 0.657986 
+
+Epoch 19
+-------------------------------
+loss: 0.617415  [   64/60000]
+loss: 0.763765  [ 6464/60000]
+loss: 0.504906  [12864/60000]
+loss: 0.758569  [19264/60000]
+loss: 0.660907  [25664/60000]
+loss: 0.624445  [32064/60000]
+loss: 0.737043  [38464/60000]
+loss: 0.800838  [44864/60000]
+loss: 0.744829  [51264/60000]
+loss: 0.709330  [57664/60000]
+Test Error: 
+ Accuracy: 77.4%, Avg loss: 0.646483 
+
+Epoch 20
+-------------------------------
+loss: 0.636804  [   64/60000]
+loss: 0.709468  [ 6464/60000]
+loss: 0.527087  [12864/60000]
+loss: 0.723498  [19264/60000]
+loss: 0.711156  [25664/60000]
+loss: 0.615480  [32064/60000]
+loss: 0.670980  [38464/60000]
+loss: 0.664937  [44864/60000]
+loss: 0.710959  [51264/60000]
+loss: 0.607577  [57664/60000]
+Test Error: 
+ Accuracy: 77.9%, Avg loss: 0.635748 
+
+Epoch 21
+-------------------------------
+loss: 0.614816  [   64/60000]
+loss: 0.707628  [ 6464/60000]
+loss: 0.489302  [12864/60000]
+loss: 0.701375  [19264/60000]
+loss: 0.609815  [25664/60000]
+loss: 0.596263  [32064/60000]
+loss: 0.744105  [38464/60000]
+loss: 0.721395  [44864/60000]
+loss: 0.671495  [51264/60000]
+loss: 0.600730  [57664/60000]
+Test Error: 
+ Accuracy: 78.3%, Avg loss: 0.625912 
+
+Epoch 22
+-------------------------------
+loss: 0.574486  [   64/60000]
+loss: 0.721622  [ 6464/60000]
+loss: 0.488595  [12864/60000]
+loss: 0.728549  [19264/60000]
+loss: 0.642455  [25664/60000]
+loss: 0.610294  [32064/60000]
+loss: 0.735651  [38464/60000]
+loss: 0.729338  [44864/60000]
+loss: 0.670417  [51264/60000]
+loss: 0.646930  [57664/60000]
+Test Error: 
+ Accuracy: 78.8%, Avg loss: 0.616754 
+
+Epoch 23
+-------------------------------
+loss: 0.581455  [   64/60000]
+loss: 0.651348  [ 6464/60000]
+loss: 0.491175  [12864/60000]
+loss: 0.707654  [19264/60000]
+loss: 0.650996  [25664/60000]
+loss: 0.627171  [32064/60000]
+loss: 0.666098  [38464/60000]
+loss: 0.679779  [44864/60000]
+loss: 0.696203  [51264/60000]
+loss: 0.619682  [57664/60000]
+Test Error: 
+ Accuracy: 79.0%, Avg loss: 0.607846 
+
+Epoch 24
+-------------------------------
+loss: 0.572871  [   64/60000]
+loss: 0.639697  [ 6464/60000]
+loss: 0.463474  [12864/60000]
+loss: 0.712242  [19264/60000]
+loss: 0.645218  [25664/60000]
+loss: 0.591073  [32064/60000]
+loss: 0.673050  [38464/60000]
+loss: 0.685910  [44864/60000]
+loss: 0.680410  [51264/60000]
+loss: 0.665205  [57664/60000]
+Test Error: 
+ Accuracy: 79.4%, Avg loss: 0.599832 
+
+Epoch 25
+-------------------------------
+loss: 0.560449  [   64/60000]
+loss: 0.658762  [ 6464/60000]
+loss: 0.439639  [12864/60000]
+loss: 0.711735  [19264/60000]
+loss: 0.702291  [25664/60000]
+loss: 0.588156  [32064/60000]
+loss: 0.640410  [38464/60000]
+loss: 0.720983  [44864/60000]
+loss: 0.651035  [51264/60000]
+loss: 0.613282  [57664/60000]
+Test Error: 
+ Accuracy: 79.5%, Avg loss: 0.592366 
+
+Epoch 26
+-------------------------------
+loss: 0.535610  [   64/60000]
+loss: 0.623020  [ 6464/60000]
+loss: 0.439348  [12864/60000]
+loss: 0.661418  [19264/60000]
+loss: 0.613323  [25664/60000]
+loss: 0.578198  [32064/60000]
+loss: 0.646807  [38464/60000]
+loss: 0.688478  [44864/60000]
+loss: 0.710046  [51264/60000]
+loss: 0.609333  [57664/60000]
+Test Error: 
+ Accuracy: 79.8%, Avg loss: 0.585287 
+
+Epoch 27
+-------------------------------
+loss: 0.484252  [   64/60000]
+loss: 0.664570  [ 6464/60000]
+loss: 0.439155  [12864/60000]
+loss: 0.660320  [19264/60000]
+loss: 0.630165  [25664/60000]
+loss: 0.605465  [32064/60000]
+loss: 0.604039  [38464/60000]
+loss: 0.681780  [44864/60000]
+loss: 0.690952  [51264/60000]
+loss: 0.579494  [57664/60000]
+Test Error: 
+ Accuracy: 80.0%, Avg loss: 0.578767 
+
+Epoch 28
+-------------------------------
+loss: 0.524099  [   64/60000]
+loss: 0.643074  [ 6464/60000]
+loss: 0.425485  [12864/60000]
+loss: 0.682533  [19264/60000]
+loss: 0.595918  [25664/60000]
+loss: 0.586165  [32064/60000]
+loss: 0.649428  [38464/60000]
+loss: 0.636160  [44864/60000]
+loss: 0.645136  [51264/60000]
+loss: 0.569549  [57664/60000]
+Test Error: 
+ Accuracy: 80.2%, Avg loss: 0.572591 
+
+Epoch 29
+-------------------------------
+loss: 0.507513  [   64/60000]
+loss: 0.614488  [ 6464/60000]
+loss: 0.460531  [12864/60000]
+loss: 0.696532  [19264/60000]
+loss: 0.583868  [25664/60000]
+loss: 0.559413  [32064/60000]
+loss: 0.619873  [38464/60000]
+loss: 0.710216  [44864/60000]
+loss: 0.671713  [51264/60000]
+loss: 0.600863  [57664/60000]
+Test Error: 
+ Accuracy: 80.4%, Avg loss: 0.566845 
+
+Epoch 30
+-------------------------------
+loss: 0.486274  [   64/60000]
+loss: 0.628098  [ 6464/60000]
+loss: 0.430219  [12864/60000]
+loss: 0.708331  [19264/60000]
+loss: 0.609635  [25664/60000]
+loss: 0.546494  [32064/60000]
+loss: 0.601163  [38464/60000]
+loss: 0.704691  [44864/60000]
+loss: 0.645793  [51264/60000]
+loss: 0.565446  [57664/60000]
+Test Error: 
+ Accuracy: 80.5%, Avg loss: 0.561256 
+
+Epoch 31
+-------------------------------
+loss: 0.493926  [   64/60000]
+loss: 0.613942  [ 6464/60000]
+loss: 0.376692  [12864/60000]
+loss: 0.695025  [19264/60000]
+loss: 0.607498  [25664/60000]
+loss: 0.540468  [32064/60000]
+loss: 0.607455  [38464/60000]
+loss: 0.712841  [44864/60000]
+loss: 0.670727  [51264/60000]
+loss: 0.545248  [57664/60000]
+Test Error: 
+ Accuracy: 80.7%, Avg loss: 0.556191 
+
+Epoch 32
+-------------------------------
+loss: 0.481013  [   64/60000]
+loss: 0.562349  [ 6464/60000]
+loss: 0.433377  [12864/60000]
+loss: 0.666805  [19264/60000]
+loss: 0.593045  [25664/60000]
+loss: 0.587128  [32064/60000]
+loss: 0.606249  [38464/60000]
+loss: 0.644734  [44864/60000]
+loss: 0.675255  [51264/60000]
+loss: 0.568087  [57664/60000]
+Test Error: 
+ Accuracy: 80.9%, Avg loss: 0.551073 
+
+Epoch 33
+-------------------------------
+loss: 0.500560  [   64/60000]
+loss: 0.618631  [ 6464/60000]
+loss: 0.415513  [12864/60000]
+loss: 0.620497  [19264/60000]
+loss: 0.613646  [25664/60000]
+loss: 0.572566  [32064/60000]
+loss: 0.607542  [38464/60000]
+loss: 0.693569  [44864/60000]
+loss: 0.592101  [51264/60000]
+loss: 0.557891  [57664/60000]
+Test Error: 
+ Accuracy: 81.0%, Avg loss: 0.546736 
+
+Epoch 34
+-------------------------------
+loss: 0.477452  [   64/60000]
+loss: 0.583678  [ 6464/60000]
+loss: 0.416824  [12864/60000]
+loss: 0.682345  [19264/60000]
+loss: 0.506534  [25664/60000]
+loss: 0.542897  [32064/60000]
+loss: 0.558408  [38464/60000]
+loss: 0.638639  [44864/60000]
+loss: 0.592590  [51264/60000]
+loss: 0.564327  [57664/60000]
+Test Error: 
+ Accuracy: 81.0%, Avg loss: 0.542367 
+
+Epoch 35
+-------------------------------
+loss: 0.461166  [   64/60000]
+loss: 0.557703  [ 6464/60000]
+loss: 0.457119  [12864/60000]
+loss: 0.638805  [19264/60000]
+loss: 0.563971  [25664/60000]
+loss: 0.537696  [32064/60000]
+loss: 0.573073  [38464/60000]
+loss: 0.675386  [44864/60000]
+loss: 0.656254  [51264/60000]
+loss: 0.567930  [57664/60000]
+Test Error: 
+ Accuracy: 81.2%, Avg loss: 0.538181 
+
+Epoch 36
+-------------------------------
+loss: 0.454521  [   64/60000]
+loss: 0.594309  [ 6464/60000]
+loss: 0.378403  [12864/60000]
+loss: 0.674881  [19264/60000]
+loss: 0.578825  [25664/60000]
+loss: 0.537637  [32064/60000]
+loss: 0.556339  [38464/60000]
+loss: 0.647215  [44864/60000]
+loss: 0.659704  [51264/60000]
+loss: 0.509028  [57664/60000]
+Test Error: 
+ Accuracy: 81.3%, Avg loss: 0.534549 
+
+Epoch 37
+-------------------------------
+loss: 0.458713  [   64/60000]
+loss: 0.576849  [ 6464/60000]
+loss: 0.346030  [12864/60000]
+loss: 0.628363  [19264/60000]
+loss: 0.533999  [25664/60000]
+loss: 0.538977  [32064/60000]
+loss: 0.510503  [38464/60000]
+loss: 0.689993  [44864/60000]
+loss: 0.639134  [51264/60000]
+loss: 0.532964  [57664/60000]
+Test Error: 
+ Accuracy: 81.5%, Avg loss: 0.530647 
+
+Epoch 38
+-------------------------------
+loss: 0.392519  [   64/60000]
+loss: 0.585487  [ 6464/60000]
+loss: 0.396170  [12864/60000]
+loss: 0.606007  [19264/60000]
+loss: 0.606205  [25664/60000]
+loss: 0.563885  [32064/60000]
+loss: 0.546315  [38464/60000]
+loss: 0.675911  [44864/60000]
+loss: 0.695619  [51264/60000]
+loss: 0.553648  [57664/60000]
+Test Error: 
+ Accuracy: 81.6%, Avg loss: 0.527046 
+
+Epoch 39
+-------------------------------
+loss: 0.448235  [   64/60000]
+loss: 0.581293  [ 6464/60000]
+loss: 0.327347  [12864/60000]
+loss: 0.620210  [19264/60000]
+loss: 0.585992  [25664/60000]
+loss: 0.547809  [32064/60000]
+loss: 0.594739  [38464/60000]
+loss: 0.649272  [44864/60000]
+loss: 0.643038  [51264/60000]
+loss: 0.509701  [57664/60000]
+Test Error: 
+ Accuracy: 81.7%, Avg loss: 0.523682 
+
+Epoch 40
+-------------------------------
+loss: 0.430015  [   64/60000]
+loss: 0.544287  [ 6464/60000]
+loss: 0.380895  [12864/60000]
+loss: 0.608836  [19264/60000]
+loss: 0.575603  [25664/60000]
+loss: 0.529118  [32064/60000]
+loss: 0.580789  [38464/60000]
+loss: 0.652189  [44864/60000]
+loss: 0.641808  [51264/60000]
+loss: 0.553182  [57664/60000]
+Test Error: 
+ Accuracy: 81.8%, Avg loss: 0.520629 
+
+Epoch 41
+-------------------------------
+loss: 0.415198  [   64/60000]
+loss: 0.559401  [ 6464/60000]
+loss: 0.364302  [12864/60000]
+loss: 0.608204  [19264/60000]
+loss: 0.534221  [25664/60000]
+loss: 0.574648  [32064/60000]
+loss: 0.527740  [38464/60000]
+loss: 0.650530  [44864/60000]
+loss: 0.574861  [51264/60000]
+loss: 0.498488  [57664/60000]
+Test Error: 
+ Accuracy: 81.9%, Avg loss: 0.517426 
+
+Epoch 42
+-------------------------------
+loss: 0.439248  [   64/60000]
+loss: 0.587995  [ 6464/60000]
+loss: 0.368372  [12864/60000]
+loss: 0.585487  [19264/60000]
+loss: 0.500006  [25664/60000]
+loss: 0.511805  [32064/60000]
+loss: 0.573569  [38464/60000]
+loss: 0.679368  [44864/60000]
+loss: 0.646687  [51264/60000]
+loss: 0.528532  [57664/60000]
+Test Error: 
+ Accuracy: 82.0%, Avg loss: 0.514529 
+
+Epoch 43
+-------------------------------
+loss: 0.433984  [   64/60000]
+loss: 0.524339  [ 6464/60000]
+loss: 0.395251  [12864/60000]
+loss: 0.581516  [19264/60000]
+loss: 0.520236  [25664/60000]
+loss: 0.531539  [32064/60000]
+loss: 0.515636  [38464/60000]
+loss: 0.664488  [44864/60000]
+loss: 0.640781  [51264/60000]
+loss: 0.504813  [57664/60000]
+Test Error: 
+ Accuracy: 82.1%, Avg loss: 0.511770 
+
+Epoch 44
+-------------------------------
+loss: 0.423223  [   64/60000]
+loss: 0.539973  [ 6464/60000]
+loss: 0.335490  [12864/60000]
+loss: 0.616651  [19264/60000]
+loss: 0.544237  [25664/60000]
+loss: 0.532550  [32064/60000]
+loss: 0.560005  [38464/60000]
+loss: 0.665030  [44864/60000]
+loss: 0.548322  [51264/60000]
+loss: 0.487250  [57664/60000]
+Test Error: 
+ Accuracy: 82.2%, Avg loss: 0.508736 
+
+Epoch 45
+-------------------------------
+loss: 0.425752  [   64/60000]
+loss: 0.527092  [ 6464/60000]
+loss: 0.328840  [12864/60000]
+loss: 0.614787  [19264/60000]
+loss: 0.533057  [25664/60000]
+loss: 0.504855  [32064/60000]
+loss: 0.560020  [38464/60000]
+loss: 0.626464  [44864/60000]
+loss: 0.662893  [51264/60000]
+loss: 0.500375  [57664/60000]
+Test Error: 
+ Accuracy: 82.3%, Avg loss: 0.506320 
+
+Epoch 46
+-------------------------------
+loss: 0.417341  [   64/60000]
+loss: 0.531774  [ 6464/60000]
+loss: 0.354004  [12864/60000]
+loss: 0.627570  [19264/60000]
+loss: 0.557077  [25664/60000]
+loss: 0.527289  [32064/60000]
+loss: 0.531685  [38464/60000]
+loss: 0.655453  [44864/60000]
+loss: 0.600211  [51264/60000]
+loss: 0.490536  [57664/60000]
+Test Error: 
+ Accuracy: 82.3%, Avg loss: 0.503571 
+
+Epoch 47
+-------------------------------
+loss: 0.390862  [   64/60000]
+loss: 0.565676  [ 6464/60000]
+loss: 0.355830  [12864/60000]
+loss: 0.600548  [19264/60000]
+loss: 0.481056  [25664/60000]
+loss: 0.503059  [32064/60000]
+loss: 0.508495  [38464/60000]
+loss: 0.664547  [44864/60000]
+loss: 0.640757  [51264/60000]
+loss: 0.477380  [57664/60000]
+Test Error: 
+ Accuracy: 82.4%, Avg loss: 0.501201 
+
+Epoch 48
+-------------------------------
+loss: 0.410720  [   64/60000]
+loss: 0.500934  [ 6464/60000]
+loss: 0.357153  [12864/60000]
+loss: 0.595672  [19264/60000]
+loss: 0.511233  [25664/60000]
+loss: 0.520689  [32064/60000]
+loss: 0.541548  [38464/60000]
+loss: 0.654920  [44864/60000]
+loss: 0.656826  [51264/60000]
+loss: 0.487816  [57664/60000]
+Test Error: 
+ Accuracy: 82.3%, Avg loss: 0.498908 
+
+Epoch 49
+-------------------------------
+loss: 0.366393  [   64/60000]
+loss: 0.547639  [ 6464/60000]
+loss: 0.349391  [12864/60000]
+loss: 0.600082  [19264/60000]
+loss: 0.493288  [25664/60000]
+loss: 0.509587  [32064/60000]
+loss: 0.521377  [38464/60000]
+loss: 0.635077  [44864/60000]
+loss: 0.623595  [51264/60000]
+loss: 0.504242  [57664/60000]
+Test Error: 
+ Accuracy: 82.5%, Avg loss: 0.496542 
+
+Epoch 50
+-------------------------------
+loss: 0.395036  [   64/60000]
+loss: 0.539723  [ 6464/60000]
+loss: 0.349148  [12864/60000]
+loss: 0.540632  [19264/60000]
+loss: 0.504727  [25664/60000]
+loss: 0.520554  [32064/60000]
+loss: 0.491151  [38464/60000]
+loss: 0.607649  [44864/60000]
+loss: 0.639295  [51264/60000]
+loss: 0.441168  [57664/60000]
+Test Error: 
+ Accuracy: 82.6%, Avg loss: 0.494327 
+
+Done!</code></pre>
+</div>
+</div>
+<div id="cell-12" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>torch.save(model.state_dict(), <span class="st">"model_01.pth"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved PyTorch Model State to model_01.pth"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Saved PyTorch Model State to model_01.pth</code></pre>
+</div>
+</div>
+<div id="cell-13" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> NeuralNetwork().to(device)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>model.load_state_dict(torch.load(<span class="st">"model_01.pth"</span>, weights_only<span class="op">=</span><span class="va">True</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>&lt;All keys matched successfully&gt;</code></pre>
+</div>
+</div>
+<div id="cell-14" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>classes <span class="op">=</span> [</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"T-shirt/top"</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Trouser"</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Pullover"</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Dress"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Coat"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sandal"</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Shirt"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sneaker"</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Bag"</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Ankle boot"</span>,</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> test_data[<span class="dv">0</span>][<span class="dv">0</span>], test_data[<span class="dv">0</span>][<span class="dv">1</span>]</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> x.to(device)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> model(x)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    predicted, actual <span class="op">=</span> classes[pred[<span class="dv">0</span>].argmax(<span class="dv">0</span>)], classes[y]</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Predicted: "</span><span class="sc">{</span>predicted<span class="sc">}</span><span class="ss">", Actual: "</span><span class="sc">{</span>actual<span class="sc">}</span><span class="ss">"'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Predicted: "Ankle boot", Actual: "Ankle boot"</code></pre>
+</div>
+</div>
+<div id="cell-15" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>my_req_dataset <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(test_dataloader))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-16" class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> model(my_req_dataset[<span class="dv">0</span>].to(device))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-17" class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>out.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<pre><code>torch.Size([64, 10])</code></pre>
+</div>
+</div>
+<div id="cell-18" class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">#torch.rand((64,1,28,28)).flatten(start_dim=1).shape</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
