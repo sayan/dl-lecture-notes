@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.43">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="dcterms.date" content="2024-09-26">
 
-<title>Deep Learning Notes – Back Propagation in Linear Layer of Neural Network</title>
+<title>Back Propagation in Linear Layer of Neural Network – Deep Learning Notes</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -226,7 +226,7 @@ window.Quarto = {
 </div>
 <section id="backpropagation-through-linear-layer-of-a-neural-network-using-pytorch" class="level1">
 <h1>Backpropagation through Linear Layer of a Neural Network using Pytorch</h1>
-<p>We will follow the teachings of Justing Johnson in his <a href="https://cs231n.stanford.edu/handouts/linear-backprop.pdf">CS231n course</a>. We will derive the backpropagation for a linear layer. In this linear layer we will assume a batch of <span class="math inline">\(N\)</span> records, with <span class="math inline">\(D\)</span> features. Linear layer transforms a <span class="math inline">\(D\)</span> dimension input to a <span class="math inline">\(M\)</span> dimension output. The weights matrix is <span class="math inline">\(W\)</span> of size <span class="math inline">\(D \times M\)</span> and the bias vector is <span class="math inline">\(b\)</span> of size <span class="math inline">\(M\)</span>. The input to the layer is <span class="math inline">\(X\)</span> of size <span class="math inline">\(N \times D\)</span> and the output is <span class="math inline">\(Z\)</span> of size <span class="math inline">\(N \times M\)</span>. The loss function is <span class="math inline">\(L\)</span>.</p>
+<p>We will follow the teachings of Justin Johnson in his <a href="https://cs231n.stanford.edu/handouts/linear-backprop.pdf">CS231n course</a>. We will derive the backpropagation for a linear layer. In this linear layer we will assume a batch of <span class="math inline">\(N\)</span> records, with <span class="math inline">\(D\)</span> features. Linear layer transforms a <span class="math inline">\(D\)</span> dimension input to a <span class="math inline">\(M\)</span> dimension output. The weights matrix is <span class="math inline">\(W\)</span> of size <span class="math inline">\(D \times M\)</span> and the bias vector is <span class="math inline">\(b\)</span> of size <span class="math inline">\(M\)</span>. The input to the layer is <span class="math inline">\(X\)</span> of size <span class="math inline">\(N \times D\)</span> and the output is <span class="math inline">\(Z\)</span> of size <span class="math inline">\(N \times M\)</span>. The loss function is <span class="math inline">\(L\)</span>.</p>
 <p>Mathematical notation:</p>
 <p><span class="math display">\[
 \begin{align*}

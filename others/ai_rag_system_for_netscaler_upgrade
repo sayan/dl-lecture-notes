@@ -1,0 +1,18 @@
+digraph "AI-based RAG System for NetScaler Upgrade" {
+	bgcolor=white
+	"User Query" [color=gold shape=ellipse style=filled]
+	"RAG System" [color=lightgreen shape=box style=filled]
+	"Knowledge Base" [color=lightblue shape=box style=filled]
+	"Document Retrieval" [color=orange shape=box style=filled]
+	"Response Generation" [color=lightpink shape=ellipse style=filled]
+	"Upgrade Guidance" [color=lightcoral shape=box style=filled]
+	"Feedback Loop" [color=violet shape=ellipse style=filled]
+	"User Query" -> "RAG System" [label="input to" color=gray]
+	"RAG System" -> "Document Retrieval" [label="retrieves from" color=gray]
+	"Document Retrieval" -> "Knowledge Base" [label=accesses color=gray]
+	"RAG System" -> "Response Generation" [label=generates color=gray]
+	"Response Generation" -> "Upgrade Guidance" [label=provides color=gray]
+	"Upgrade Guidance" -> "User Query" [label=answers color=gray]
+	"User Query" -> "Feedback Loop" [label="feedback to" color=gray]
+	"Feedback Loop" -> "RAG System" [label=improves color=gray]
+}

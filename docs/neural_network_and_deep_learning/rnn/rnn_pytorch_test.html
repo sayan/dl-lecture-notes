@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>rnn_pytorch_test – Deep Learning Notes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Deep Learning Notes</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../neural_network_and_deep_learning/week_2/w2_binary_classification.html"> 
+<span class="menu-text">Lecture notes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+
+<div id="cell-0" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-1" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>file_name <span class="op">=</span> <span class="st">"/Users/sayan/personal/sayan_github/dl-lecture-notes/docs/neural_network_and_deep_learning/rnn/data/input.txt"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-2" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data I/O</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="bu">open</span>(file_name, <span class="st">'r'</span>).read()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>chars <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(data))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data_size, vocab_size <span class="op">=</span> <span class="bu">len</span>(data), <span class="bu">len</span>(chars)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'data has </span><span class="sc">{</span>data_size<span class="sc">}</span><span class="ss"> characters, </span><span class="sc">{</span>vocab_size<span class="sc">}</span><span class="ss"> unique.'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>char_to_ix <span class="op">=</span> { ch:i <span class="cf">for</span> i,ch <span class="kw">in</span> <span class="bu">enumerate</span>(chars) }</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ix_to_char <span class="op">=</span> { i:ch <span class="cf">for</span> i,ch <span class="kw">in</span> <span class="bu">enumerate</span>(chars) }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>data has 1115394 characters, 65 unique.</code></pre>
+</div>
+</div>
+<div id="cell-3" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hyperparameters</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>hidden_size <span class="op">=</span> <span class="dv">100</span> <span class="co"># size of hidden layer of neurons</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>seq_length <span class="op">=</span> <span class="dv">25</span> <span class="co"># number of steps to unroll the RNN for</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="op">=</span> <span class="fl">1e-1</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># model parameters</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Wxh <span class="op">=</span> np.random.randn(hidden_size, vocab_size)<span class="op">*</span><span class="fl">0.01</span> <span class="co"># input to hidden</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>Whh <span class="op">=</span> np.random.randn(hidden_size, hidden_size)<span class="op">*</span><span class="fl">0.01</span> <span class="co"># hidden to hidden</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>Why <span class="op">=</span> np.random.randn(vocab_size, hidden_size)<span class="op">*</span><span class="fl">0.01</span> <span class="co"># hidden to output</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>bh <span class="op">=</span> np.zeros((hidden_size, <span class="dv">1</span>)) <span class="co"># hidden bias</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>by <span class="op">=</span> np.zeros((vocab_size, <span class="dv">1</span>)) <span class="co"># output bias</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-4" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>my_test <span class="op">=</span> {}</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(my_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>dict</code></pre>
+</div>
+</div>
+<div id="cell-5" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>linear_layer_1 <span class="op">=</span> torch.nn.Linear(<span class="dv">4</span>,<span class="dv">3</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, v <span class="kw">in</span> linear_layer_1.named_parameters():</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name,v)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(v.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>weight Parameter containing:
+tensor([[-0.3600, -0.4717, -0.4435,  0.4761],
+        [ 0.1459,  0.0818,  0.2433, -0.1609],
+        [ 0.2457,  0.1844,  0.0354,  0.4800]], requires_grad=True)
+torch.Size([3, 4])
+bias Parameter containing:
+tensor([ 0.2351, -0.1275,  0.4702], requires_grad=True)
+torch.Size([3])</code></pre>
+</div>
+</div>
+<div id="cell-6" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>torch.rand(<span class="dv">3</span>,<span class="dv">1</span>).T <span class="op">@</span> linear_layer_1.weight </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>tensor([[ 0.1020, -0.0508, -0.0655,  0.5761]], grad_fn=&lt;MmBackward0&gt;)</code></pre>
+</div>
+</div>
+<div id="cell-7" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100</span> <span class="co"># number of points per class</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> <span class="dv">2</span> <span class="co"># dimensionality</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span> <span class="co"># number of classes</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.zeros((N<span class="op">*</span>K,D)) <span class="co"># data matrix (each row = single example)</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.zeros(N<span class="op">*</span>K, dtype<span class="op">=</span><span class="st">'uint8'</span>) <span class="co"># class labels</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(K):</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  ix <span class="op">=</span> <span class="bu">range</span>(N<span class="op">*</span>j,N<span class="op">*</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  r <span class="op">=</span> np.linspace(<span class="fl">0.0</span>,<span class="dv">1</span>,N) <span class="co"># radius</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  t <span class="op">=</span> np.linspace(j<span class="op">*</span><span class="dv">4</span>,(j<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span><span class="dv">4</span>,N) <span class="op">+</span> np.random.randn(N)<span class="op">*</span><span class="fl">0.2</span> <span class="co"># theta</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  X[ix] <span class="op">=</span> np.c_[r<span class="op">*</span>np.sin(t), r<span class="op">*</span>np.cos(t)]</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  y[ix] <span class="op">=</span> j</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># lets visualize the data:</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-8" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X.shape, y.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>((300, 2), (300,))</code></pre>
+</div>
+</div>
+<div id="cell-9" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder, OneHotEncoder</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_iris</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-10" class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>iris_data <span class="op">=</span> load_iris(as_frame<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>iris_data.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+<pre><code>dict_keys(['data', 'target', 'frame', 'target_names', 'DESCR', 'feature_names', 'filename', 'data_module'])</code></pre>
+</div>
+</div>
+<div id="cell-11" class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>iris_data[<span class="st">'data'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">sepal length (cm)</th>
+<th data-quarto-table-cell-role="th">sepal width (cm)</th>
+<th data-quarto-table-cell-role="th">petal length (cm)</th>
+<th data-quarto-table-cell-role="th">petal width (cm)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>5.1</td>
+<td>3.5</td>
+<td>1.4</td>
+<td>0.2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>4.9</td>
+<td>3.0</td>
+<td>1.4</td>
+<td>0.2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>4.7</td>
+<td>3.2</td>
+<td>1.3</td>
+<td>0.2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4.6</td>
+<td>3.1</td>
+<td>1.5</td>
+<td>0.2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5.0</td>
+<td>3.6</td>
+<td>1.4</td>
+<td>0.2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">145</td>
+<td>6.7</td>
+<td>3.0</td>
+<td>5.2</td>
+<td>2.3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">146</td>
+<td>6.3</td>
+<td>2.5</td>
+<td>5.0</td>
+<td>1.9</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">147</td>
+<td>6.5</td>
+<td>3.0</td>
+<td>5.2</td>
+<td>2.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">148</td>
+<td>6.2</td>
+<td>3.4</td>
+<td>5.4</td>
+<td>2.3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">149</td>
+<td>5.9</td>
+<td>3.0</td>
+<td>5.1</td>
+<td>1.8</td>
+</tr>
+</tbody>
+</table>
+
+<p>150 rows × 4 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-12" class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>?train_test_split</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Signature:
+train_test_split(
+    *arrays,
+    test_size=None,
+    train_size=None,
+    random_state=None,
+    shuffle=True,
+    stratify=None,
+)
+Docstring:
+Split arrays or matrices into random train and test subsets.
+
+Quick utility that wraps input validation,
+``next(ShuffleSplit().split(X, y))``, and application to input data
+into a single call for splitting (and optionally subsampling) data into a
+one-liner.
+
+Read more in the :ref:`User Guide &lt;cross_validation&gt;`.
+
+Parameters
+----------
+*arrays : sequence of indexables with same length / shape[0]
+    Allowed inputs are lists, numpy arrays, scipy-sparse
+    matrices or pandas dataframes.
+
+test_size : float or int, default=None
+    If float, should be between 0.0 and 1.0 and represent the proportion
+    of the dataset to include in the test split. If int, represents the
+    absolute number of test samples. If None, the value is set to the
+    complement of the train size. If ``train_size`` is also None, it will
+    be set to 0.25.
+
+train_size : float or int, default=None
+    If float, should be between 0.0 and 1.0 and represent the
+    proportion of the dataset to include in the train split. If
+    int, represents the absolute number of train samples. If None,
+    the value is automatically set to the complement of the test size.
+
+random_state : int, RandomState instance or None, default=None
+    Controls the shuffling applied to the data before applying the split.
+    Pass an int for reproducible output across multiple function calls.
+    See :term:`Glossary &lt;random_state&gt;`.
+
+shuffle : bool, default=True
+    Whether or not to shuffle the data before splitting. If shuffle=False
+    then stratify must be None.
+
+stratify : array-like, default=None
+    If not None, data is split in a stratified fashion, using this as
+    the class labels.
+    Read more in the :ref:`User Guide &lt;stratification&gt;`.
+
+Returns
+-------
+splitting : list, length=2 * len(arrays)
+    List containing train-test split of inputs.
+
+    .. versionadded:: 0.16
+        If the input is sparse, the output will be a
+        ``scipy.sparse.csr_matrix``. Else, output type is the same as the
+        input type.
+
+Examples
+--------
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; from sklearn.model_selection import train_test_split
+&gt;&gt;&gt; X, y = np.arange(10).reshape((5, 2)), range(5)
+&gt;&gt;&gt; X
+array([[0, 1],
+       [2, 3],
+       [4, 5],
+       [6, 7],
+       [8, 9]])
+&gt;&gt;&gt; list(y)
+[0, 1, 2, 3, 4]
+
+&gt;&gt;&gt; X_train, X_test, y_train, y_test = train_test_split(
+...     X, y, test_size=0.33, random_state=42)
+...
+&gt;&gt;&gt; X_train
+array([[4, 5],
+       [0, 1],
+       [6, 7]])
+&gt;&gt;&gt; y_train
+[2, 0, 3]
+&gt;&gt;&gt; X_test
+array([[2, 3],
+       [8, 9]])
+&gt;&gt;&gt; y_test
+[1, 4]
+
+&gt;&gt;&gt; train_test_split(y, shuffle=False)
+[[0, 1, 2], [3, 4]]
+File:      ~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/sklearn/model_selection/_split.py
+Type:      function</code></pre>
+</div>
+</div>
+<div id="cell-13" class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-14" class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>?LogisticRegression</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Init signature:
+LogisticRegression(
+    penalty='l2',
+    *,
+    dual=False,
+    tol=0.0001,
+    C=1.0,
+    fit_intercept=True,
+    intercept_scaling=1,
+    class_weight=None,
+    random_state=None,
+    solver='lbfgs',
+    max_iter=100,
+    multi_class='deprecated',
+    verbose=0,
+    warm_start=False,
+    n_jobs=None,
+    l1_ratio=None,
+)
+Docstring:     
+Logistic Regression (aka logit, MaxEnt) classifier.
+
+In the multiclass case, the training algorithm uses the one-vs-rest (OvR)
+scheme if the 'multi_class' option is set to 'ovr', and uses the
+cross-entropy loss if the 'multi_class' option is set to 'multinomial'.
+(Currently the 'multinomial' option is supported only by the 'lbfgs',
+'sag', 'saga' and 'newton-cg' solvers.)
+
+This class implements regularized logistic regression using the
+'liblinear' library, 'newton-cg', 'sag', 'saga' and 'lbfgs' solvers. **Note
+that regularization is applied by default**. It can handle both dense
+and sparse input. Use C-ordered arrays or CSR matrices containing 64-bit
+floats for optimal performance; any other input format will be converted
+(and copied).
+
+The 'newton-cg', 'sag', and 'lbfgs' solvers support only L2 regularization
+with primal formulation, or no regularization. The 'liblinear' solver
+supports both L1 and L2 regularization, with a dual formulation only for
+the L2 penalty. The Elastic-Net regularization is only supported by the
+'saga' solver.
+
+Read more in the :ref:`User Guide &lt;logistic_regression&gt;`.
+
+Parameters
+----------
+penalty : {'l1', 'l2', 'elasticnet', None}, default='l2'
+    Specify the norm of the penalty:
+
+    - `None`: no penalty is added;
+    - `'l2'`: add a L2 penalty term and it is the default choice;
+    - `'l1'`: add a L1 penalty term;
+    - `'elasticnet'`: both L1 and L2 penalty terms are added.
+
+    .. warning::
+       Some penalties may not work with some solvers. See the parameter
+       `solver` below, to know the compatibility between the penalty and
+       solver.
+
+    .. versionadded:: 0.19
+       l1 penalty with SAGA solver (allowing 'multinomial' + L1)
+
+dual : bool, default=False
+    Dual (constrained) or primal (regularized, see also
+    :ref:`this equation &lt;regularized-logistic-loss&gt;`) formulation. Dual formulation
+    is only implemented for l2 penalty with liblinear solver. Prefer dual=False when
+    n_samples &gt; n_features.
+
+tol : float, default=1e-4
+    Tolerance for stopping criteria.
+
+C : float, default=1.0
+    Inverse of regularization strength; must be a positive float.
+    Like in support vector machines, smaller values specify stronger
+    regularization.
+
+fit_intercept : bool, default=True
+    Specifies if a constant (a.k.a. bias or intercept) should be
+    added to the decision function.
+
+intercept_scaling : float, default=1
+    Useful only when the solver 'liblinear' is used
+    and self.fit_intercept is set to True. In this case, x becomes
+    [x, self.intercept_scaling],
+    i.e. a "synthetic" feature with constant value equal to
+    intercept_scaling is appended to the instance vector.
+    The intercept becomes ``intercept_scaling * synthetic_feature_weight``.
+
+    Note! the synthetic feature weight is subject to l1/l2 regularization
+    as all other features.
+    To lessen the effect of regularization on synthetic feature weight
+    (and therefore on the intercept) intercept_scaling has to be increased.
+
+class_weight : dict or 'balanced', default=None
+    Weights associated with classes in the form ``{class_label: weight}``.
+    If not given, all classes are supposed to have weight one.
+
+    The "balanced" mode uses the values of y to automatically adjust
+    weights inversely proportional to class frequencies in the input data
+    as ``n_samples / (n_classes * np.bincount(y))``.
+
+    Note that these weights will be multiplied with sample_weight (passed
+    through the fit method) if sample_weight is specified.
+
+    .. versionadded:: 0.17
+       *class_weight='balanced'*
+
+random_state : int, RandomState instance, default=None
+    Used when ``solver`` == 'sag', 'saga' or 'liblinear' to shuffle the
+    data. See :term:`Glossary &lt;random_state&gt;` for details.
+
+solver : {'lbfgs', 'liblinear', 'newton-cg', 'newton-cholesky', 'sag', 'saga'},             default='lbfgs'
+
+    Algorithm to use in the optimization problem. Default is 'lbfgs'.
+    To choose a solver, you might want to consider the following aspects:
+
+    - For small datasets, 'liblinear' is a good choice, whereas 'sag'
+      and 'saga' are faster for large ones;
+    - For multiclass problems, only 'newton-cg', 'sag', 'saga' and
+      'lbfgs' handle multinomial loss;
+    - 'liblinear' and 'newton-cholesky' can only handle binary classification
+      by default. To apply a one-versus-rest scheme for the multiclass setting
+      one can wrapt it with the `OneVsRestClassifier`.
+    - 'newton-cholesky' is a good choice for `n_samples` &gt;&gt; `n_features`,
+      especially with one-hot encoded categorical features with rare
+      categories. Be aware that the memory usage of this solver has a quadratic
+      dependency on `n_features` because it explicitly computes the Hessian
+      matrix.
+
+    .. warning::
+       The choice of the algorithm depends on the penalty chosen and on
+       (multinomial) multiclass support:
+
+       ================= ============================== ======================
+       solver            penalty                        multinomial multiclass
+       ================= ============================== ======================
+       'lbfgs'           'l2', None                     yes
+       'liblinear'       'l1', 'l2'                     no
+       'newton-cg'       'l2', None                     yes
+       'newton-cholesky' 'l2', None                     no
+       'sag'             'l2', None                     yes
+       'saga'            'elasticnet', 'l1', 'l2', None yes
+       ================= ============================== ======================
+
+    .. note::
+       'sag' and 'saga' fast convergence is only guaranteed on features
+       with approximately the same scale. You can preprocess the data with
+       a scaler from :mod:`sklearn.preprocessing`.
+
+    .. seealso::
+       Refer to the User Guide for more information regarding
+       :class:`LogisticRegression` and more specifically the
+       :ref:`Table &lt;Logistic_regression&gt;`
+       summarizing solver/penalty supports.
+
+    .. versionadded:: 0.17
+       Stochastic Average Gradient descent solver.
+    .. versionadded:: 0.19
+       SAGA solver.
+    .. versionchanged:: 0.22
+        The default solver changed from 'liblinear' to 'lbfgs' in 0.22.
+    .. versionadded:: 1.2
+       newton-cholesky solver.
+
+max_iter : int, default=100
+    Maximum number of iterations taken for the solvers to converge.
+
+multi_class : {'auto', 'ovr', 'multinomial'}, default='auto'
+    If the option chosen is 'ovr', then a binary problem is fit for each
+    label. For 'multinomial' the loss minimised is the multinomial loss fit
+    across the entire probability distribution, *even when the data is
+    binary*. 'multinomial' is unavailable when solver='liblinear'.
+    'auto' selects 'ovr' if the data is binary, or if solver='liblinear',
+    and otherwise selects 'multinomial'.
+
+    .. versionadded:: 0.18
+       Stochastic Average Gradient descent solver for 'multinomial' case.
+    .. versionchanged:: 0.22
+        Default changed from 'ovr' to 'auto' in 0.22.
+    .. deprecated:: 1.5
+       ``multi_class`` was deprecated in version 1.5 and will be removed in 1.7.
+       From then on, the recommended 'multinomial' will always be used for
+       `n_classes &gt;= 3`.
+       Solvers that do not support 'multinomial' will raise an error.
+       Use `sklearn.multiclass.OneVsRestClassifier(LogisticRegression())` if you
+       still want to use OvR.
+
+verbose : int, default=0
+    For the liblinear and lbfgs solvers set verbose to any positive
+    number for verbosity.
+
+warm_start : bool, default=False
+    When set to True, reuse the solution of the previous call to fit as
+    initialization, otherwise, just erase the previous solution.
+    Useless for liblinear solver. See :term:`the Glossary &lt;warm_start&gt;`.
+
+    .. versionadded:: 0.17
+       *warm_start* to support *lbfgs*, *newton-cg*, *sag*, *saga* solvers.
+
+n_jobs : int, default=None
+    Number of CPU cores used when parallelizing over classes if
+    multi_class='ovr'". This parameter is ignored when the ``solver`` is
+    set to 'liblinear' regardless of whether 'multi_class' is specified or
+    not. ``None`` means 1 unless in a :obj:`joblib.parallel_backend`
+    context. ``-1`` means using all processors.
+    See :term:`Glossary &lt;n_jobs&gt;` for more details.
+
+l1_ratio : float, default=None
+    The Elastic-Net mixing parameter, with ``0 &lt;= l1_ratio &lt;= 1``. Only
+    used if ``penalty='elasticnet'``. Setting ``l1_ratio=0`` is equivalent
+    to using ``penalty='l2'``, while setting ``l1_ratio=1`` is equivalent
+    to using ``penalty='l1'``. For ``0 &lt; l1_ratio &lt;1``, the penalty is a
+    combination of L1 and L2.
+
+Attributes
+----------
+
+classes_ : ndarray of shape (n_classes, )
+    A list of class labels known to the classifier.
+
+coef_ : ndarray of shape (1, n_features) or (n_classes, n_features)
+    Coefficient of the features in the decision function.
+
+    `coef_` is of shape (1, n_features) when the given problem is binary.
+    In particular, when `multi_class='multinomial'`, `coef_` corresponds
+    to outcome 1 (True) and `-coef_` corresponds to outcome 0 (False).
+
+intercept_ : ndarray of shape (1,) or (n_classes,)
+    Intercept (a.k.a. bias) added to the decision function.
+
+    If `fit_intercept` is set to False, the intercept is set to zero.
+    `intercept_` is of shape (1,) when the given problem is binary.
+    In particular, when `multi_class='multinomial'`, `intercept_`
+    corresponds to outcome 1 (True) and `-intercept_` corresponds to
+    outcome 0 (False).
+
+n_features_in_ : int
+    Number of features seen during :term:`fit`.
+
+    .. versionadded:: 0.24
+
+feature_names_in_ : ndarray of shape (`n_features_in_`,)
+    Names of features seen during :term:`fit`. Defined only when `X`
+    has feature names that are all strings.
+
+    .. versionadded:: 1.0
+
+n_iter_ : ndarray of shape (n_classes,) or (1, )
+    Actual number of iterations for all classes. If binary or multinomial,
+    it returns only 1 element. For liblinear solver, only the maximum
+    number of iteration across all classes is given.
+
+    .. versionchanged:: 0.20
+
+        In SciPy &lt;= 1.0.0 the number of lbfgs iterations may exceed
+        ``max_iter``. ``n_iter_`` will now report at most ``max_iter``.
+
+See Also
+--------
+SGDClassifier : Incrementally trained logistic regression (when given
+    the parameter ``loss="log_loss"``).
+LogisticRegressionCV : Logistic regression with built-in cross validation.
+
+Notes
+-----
+The underlying C implementation uses a random number generator to
+select features when fitting the model. It is thus not uncommon,
+to have slightly different results for the same input data. If
+that happens, try with a smaller tol parameter.
+
+Predict output may not match that of standalone liblinear in certain
+cases. See :ref:`differences from liblinear &lt;liblinear_differences&gt;`
+in the narrative documentation.
+
+References
+----------
+
+L-BFGS-B -- Software for Large-scale Bound-constrained Optimization
+    Ciyou Zhu, Richard Byrd, Jorge Nocedal and Jose Luis Morales.
+    http://users.iems.northwestern.edu/~nocedal/lbfgsb.html
+
+LIBLINEAR -- A Library for Large Linear Classification
+    https://www.csie.ntu.edu.tw/~cjlin/liblinear/
+
+SAG -- Mark Schmidt, Nicolas Le Roux, and Francis Bach
+    Minimizing Finite Sums with the Stochastic Average Gradient
+    https://hal.inria.fr/hal-00860051/document
+
+SAGA -- Defazio, A., Bach F. &amp; Lacoste-Julien S. (2014).
+        :arxiv:`"SAGA: A Fast Incremental Gradient Method With Support
+        for Non-Strongly Convex Composite Objectives" &lt;1407.0202&gt;`
+
+Hsiang-Fu Yu, Fang-Lan Huang, Chih-Jen Lin (2011). Dual coordinate descent
+    methods for logistic regression and maximum entropy models.
+    Machine Learning 85(1-2):41-75.
+    https://www.csie.ntu.edu.tw/~cjlin/papers/maxent_dual.pdf
+
+Examples
+--------
+&gt;&gt;&gt; from sklearn.datasets import load_iris
+&gt;&gt;&gt; from sklearn.linear_model import LogisticRegression
+&gt;&gt;&gt; X, y = load_iris(return_X_y=True)
+&gt;&gt;&gt; clf = LogisticRegression(random_state=0).fit(X, y)
+&gt;&gt;&gt; clf.predict(X[:2, :])
+array([0, 0])
+&gt;&gt;&gt; clf.predict_proba(X[:2, :])
+array([[9.8...e-01, 1.8...e-02, 1.4...e-08],
+       [9.7...e-01, 2.8...e-02, ...e-08]])
+&gt;&gt;&gt; clf.score(X, y)
+0.97...
+File:           ~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py
+Type:           type
+Subclasses:     LogisticRegressionCV</code></pre>
+</div>
+</div>
+<div id="cell-15" class="cell" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> load_iris(return_X_y<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-16" class="cell" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#y</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_friedman3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-17" class="cell" data-execution_count="49">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>?make_friedman3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Signature: make_friedman3(n_samples=100, *, noise=0.0, random_state=None)
+Docstring:
+Generate the "Friedman #3" regression problem.
+
+This dataset is described in Friedman [1] and Breiman [2].
+
+Inputs `X` are 4 independent features uniformly distributed on the
+intervals::
+
+    0 &lt;= X[:, 0] &lt;= 100,
+    40 * pi &lt;= X[:, 1] &lt;= 560 * pi,
+    0 &lt;= X[:, 2] &lt;= 1,
+    1 &lt;= X[:, 3] &lt;= 11.
+
+The output `y` is created according to the formula::
+
+    y(X) = arctan((X[:, 1] * X[:, 2] - 1 / (X[:, 1] * X[:, 3])) / X[:, 0]) + noise * N(0, 1).
+
+Read more in the :ref:`User Guide &lt;sample_generators&gt;`.
+
+Parameters
+----------
+n_samples : int, default=100
+    The number of samples.
+
+noise : float, default=0.0
+    The standard deviation of the gaussian noise applied to the output.
+
+random_state : int, RandomState instance or None, default=None
+    Determines random number generation for dataset noise. Pass an int
+    for reproducible output across multiple function calls.
+    See :term:`Glossary &lt;random_state&gt;`.
+
+Returns
+-------
+X : ndarray of shape (n_samples, 4)
+    The input samples.
+
+y : ndarray of shape (n_samples,)
+    The output values.
+
+References
+----------
+.. [1] J. Friedman, "Multivariate adaptive regression splines", The Annals
+       of Statistics 19 (1), pages 1-67, 1991.
+
+.. [2] L. Breiman, "Bagging predictors", Machine Learning 24,
+       pages 123-140, 1996.
+
+Examples
+--------
+&gt;&gt;&gt; from sklearn.datasets import make_friedman3
+&gt;&gt;&gt; X, y = make_friedman3(random_state=42)
+&gt;&gt;&gt; X.shape
+(100, 4)
+&gt;&gt;&gt; y.shape
+(100,)
+&gt;&gt;&gt; list(y[:3])
+[np.float64(1.5...), np.float64(0.9...), np.float64(0.4...)]
+File:      ~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/sklearn/datasets/_samples_generator.py
+Type:      function</code></pre>
+</div>
+</div>
+<div id="cell-18" class="cell" data-execution_count="51">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim <span class="im">import</span> AdamW</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>?AdamW</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Init signature:
+AdamW(
+    params: Union[Iterable[torch.Tensor], Iterable[Dict[str, Any]]],
+    lr: Union[float, torch.Tensor] = 0.001,
+    betas: Tuple[float, float] = (0.9, 0.999),
+    eps: float = 1e-08,
+    weight_decay: float = 0.01,
+    amsgrad: bool = False,
+    *,
+    maximize: bool = False,
+    foreach: Optional[bool] = None,
+    capturable: bool = False,
+    differentiable: bool = False,
+    fused: Optional[bool] = None,
+)
+Docstring:     
+Implements AdamW algorithm.
+
+.. math::
+   \begin{aligned}
+        &amp;\rule{110mm}{0.4pt}                                                                 \\
+        &amp;\textbf{input}      : \gamma \text{(lr)}, \: \beta_1, \beta_2
+            \text{(betas)}, \: \theta_0 \text{(params)}, \: f(\theta) \text{(objective)},
+            \: \epsilon \text{ (epsilon)}                                                    \\
+        &amp;\hspace{13mm}      \lambda \text{(weight decay)},  \: \textit{amsgrad},
+            \: \textit{maximize}                                                             \\
+        &amp;\textbf{initialize} : m_0 \leftarrow 0 \text{ (first moment)}, v_0 \leftarrow 0
+            \text{ ( second moment)}, \: \widehat{v_0}^{max}\leftarrow 0              \\[-1.ex]
+        &amp;\rule{110mm}{0.4pt}                                                                 \\
+        &amp;\textbf{for} \: t=1 \: \textbf{to} \: \ldots \: \textbf{do}                         \\
+
+        &amp;\hspace{5mm}\textbf{if} \: \textit{maximize}:                                       \\
+        &amp;\hspace{10mm}g_t           \leftarrow   -\nabla_{\theta} f_t (\theta_{t-1})          \\
+        &amp;\hspace{5mm}\textbf{else}                                                           \\
+        &amp;\hspace{10mm}g_t           \leftarrow   \nabla_{\theta} f_t (\theta_{t-1})           \\
+        &amp;\hspace{5mm} \theta_t \leftarrow \theta_{t-1} - \gamma \lambda \theta_{t-1}         \\
+        &amp;\hspace{5mm}m_t           \leftarrow   \beta_1 m_{t-1} + (1 - \beta_1) g_t          \\
+        &amp;\hspace{5mm}v_t           \leftarrow   \beta_2 v_{t-1} + (1-\beta_2) g^2_t          \\
+        &amp;\hspace{5mm}\widehat{m_t} \leftarrow   m_t/\big(1-\beta_1^t \big)                   \\
+        &amp;\hspace{5mm}\widehat{v_t} \leftarrow   v_t/\big(1-\beta_2^t \big)                   \\
+        &amp;\hspace{5mm}\textbf{if} \: amsgrad                                                  \\
+        &amp;\hspace{10mm}\widehat{v_t}^{max} \leftarrow \mathrm{max}(\widehat{v_t}^{max},
+            \widehat{v_t})                                                                   \\
+        &amp;\hspace{10mm}\theta_t \leftarrow \theta_t - \gamma \widehat{m_t}/
+            \big(\sqrt{\widehat{v_t}^{max}} + \epsilon \big)                                 \\
+        &amp;\hspace{5mm}\textbf{else}                                                           \\
+        &amp;\hspace{10mm}\theta_t \leftarrow \theta_t - \gamma \widehat{m_t}/
+            \big(\sqrt{\widehat{v_t}} + \epsilon \big)                                       \\
+        &amp;\rule{110mm}{0.4pt}                                                          \\[-1.ex]
+        &amp;\bf{return} \:  \theta_t                                                     \\[-1.ex]
+        &amp;\rule{110mm}{0.4pt}                                                          \\[-1.ex]
+   \end{aligned}
+
+For further details regarding the algorithm we refer to `Decoupled Weight Decay Regularization`_.
+
+Args:
+    params (iterable): iterable of parameters to optimize or dicts defining
+        parameter groups
+    lr (float, Tensor, optional): learning rate (default: 1e-3). A tensor LR
+        is not yet supported for all our implementations. Please use a float
+        LR if you are not also specifying fused=True or capturable=True.
+    betas (Tuple[float, float], optional): coefficients used for computing
+        running averages of gradient and its square (default: (0.9, 0.999))
+    eps (float, optional): term added to the denominator to improve
+        numerical stability (default: 1e-8)
+    weight_decay (float, optional): weight decay coefficient (default: 1e-2)
+    amsgrad (bool, optional): whether to use the AMSGrad variant of this
+        algorithm from the paper `On the Convergence of Adam and Beyond`_
+        (default: False)
+    maximize (bool, optional): maximize the objective with respect to the
+        params, instead of minimizing (default: False)
+    foreach (bool, optional): whether foreach implementation of optimizer
+        is used. If unspecified by the user (so foreach is None), we will try to use
+        foreach over the for-loop implementation on CUDA, since it is usually
+        significantly more performant. Note that the foreach implementation uses
+        ~ sizeof(params) more peak memory than the for-loop version due to the intermediates
+        being a tensorlist vs just one tensor. If memory is prohibitive, batch fewer
+        parameters through the optimizer at a time or switch this flag to False (default: None)
+    capturable (bool, optional): whether this instance is safe to
+        capture in a CUDA graph. Passing True can impair ungraphed performance,
+        so if you don't intend to graph capture this instance, leave it False
+        (default: False)
+    differentiable (bool, optional): whether autograd should
+        occur through the optimizer step in training. Otherwise, the step()
+        function runs in a torch.no_grad() context. Setting to True can impair
+        performance, so leave it False if you don't intend to run autograd
+        through this instance (default: False)
+    fused (bool, optional): whether the fused implementation is used.
+        Currently, `torch.float64`, `torch.float32`, `torch.float16`, and `torch.bfloat16`
+        are supported. (default: None)
+
+.. note:: The foreach and fused implementations are typically faster than the for-loop,
+          single-tensor implementation, with fused being theoretically fastest with both
+          vertical and horizontal fusion. As such, if the user has not specified either
+          flag (i.e., when foreach = fused = None), we will attempt defaulting to the foreach
+          implementation when the tensors are all on CUDA. Why not fused? Since the fused
+          implementation is relatively new, we want to give it sufficient bake-in time.
+          To specify fused, pass True for fused. To force running the for-loop
+          implementation, pass False for either foreach or fused. 
+.. Note::
+    A prototype implementation of Adam and AdamW for MPS supports `torch.float32` and `torch.float16`.
+.. _Decoupled Weight Decay Regularization:
+    https://arxiv.org/abs/1711.05101
+.. _On the Convergence of Adam and Beyond:
+    https://openreview.net/forum?id=ryQu7f-RZ
+File:           ~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/torch/optim/adamw.py
+Type:           type
+Subclasses:     </code></pre>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">1</span>,<span class="dv">23</span>,<span class="dv">2</span>,<span class="dv">4</span>])</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">8</span>,<span class="dv">65</span>,<span class="dv">23</span>,<span class="dv">90</span>])</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-19" class="cell quarto-layout-panel" data-execution_count="53" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rnn_pytorch_test_files/figure-html/cell-21-output-1.png" class="img-fluid figure-img"></p>
+<figcaption>Line Plot 1</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rnn_pytorch_test_files/figure-html/cell-21-output-2.png" class="img-fluid figure-img"></p>
+<figcaption>Line Plot 2</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="cell-20" class="cell" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-21" class="cell" data-execution_count="56">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>rnn <span class="op">=</span> nn.LSTM(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">2</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span> <span class="op">=</span> torch.randn(<span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">10</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>h0 <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">20</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>c0 <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">20</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>output, (hn, cn) <span class="op">=</span> rnn(<span class="bu">input</span>, (h0, c0))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-22" class="cell" data-execution_count="58">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-23" class="cell" data-execution_count="60">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>rnn_names <span class="op">=</span> []</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n, p <span class="kw">in</span> rnn.named_parameters():</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    rnn_names.append(n)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">#print(f"n:{n}, p:{p}")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-24" class="cell" data-execution_count="61">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rnn_names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="61">
+<pre><code>['weight_ih_l0',
+ 'weight_hh_l0',
+ 'bias_ih_l0',
+ 'bias_hh_l0',
+ 'weight_ih_l1',
+ 'weight_hh_l1',
+ 'bias_ih_l1',
+ 'bias_hh_l1']</code></pre>
+</div>
+</div>
+<div id="cell-25" class="cell" data-execution_count="62">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>tessaaaaaaaaafgz <span class="op">=</span> nn.LSTMCell(<span class="dv">10</span>, <span class="dv">20</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>lstm_names <span class="op">=</span> []</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n, p <span class="kw">in</span> test.named_parameters():</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    lstm_names.append(n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-26" class="cell" data-execution_count="63">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>lstm_names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="63">
+<pre><code>['weight_ih', 'weight_hh', 'bias_ih', 'bias_hh']</code></pre>
+</div>
+</div>
+<div id="cell-27" class="cell" data-execution_count="64">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>linear_layer <span class="op">=</span> nn.Linear(<span class="dv">5</span>,<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-28" class="cell" data-execution_count="66">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>linear_layer.bias</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="66">
+<pre><code>Parameter containing:
+tensor([ 0.3019, -0.1440,  0.0632], requires_grad=True)</code></pre>
+</div>
+</div>
+
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

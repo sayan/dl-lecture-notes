@@ -1,0 +1,101 @@
+// NetScaler Upgrade Knowledge Graph
+digraph {
+	node [fontname=Helvetica fontsize=10 shape=rectangle style=filled]
+	subgraph cluster_Instances {
+		color=skyblue fillcolor=skyblue label=Instances style=filled
+		NetScaler1 [label="NetScaler1
+Model: MPX
+Current Version: 12.1"]
+		NetScaler2 [label="NetScaler2
+Model: VPX
+Current Version: 12.1"]
+	}
+	subgraph cluster_Firmware {
+		color=lightgreen fillcolor=lightgreen label=Firmware style=filled
+		"Firmware12.1" [label="Firmware 12.1"]
+		"Firmware13.0" [label="Firmware 13.0"]
+		"Firmware13.1" [label="Firmware 13.1"]
+	}
+	subgraph "cluster_Upgrade Packages" {
+		color=orange fillcolor=orange label="Upgrade Packages" style=filled
+		"UpgradePackage13.0" [label="Upgrade Package 13.0"]
+		"UpgradePackage13.1" [label="Upgrade Package 13.1"]
+	}
+	subgraph "cluster_Pre-Upgrade Tasks" {
+		color=lightcoral fillcolor=lightcoral label="Pre-Upgrade Tasks" style=filled
+		BackupConfigs [label="Backup Configurations"]
+		CheckCompatibility [label="Check Compatibility"]
+		ObtainApproval [label="Obtain Approval"]
+		NotifyUsers [label="Notify Users"]
+	}
+	subgraph "cluster_Post-Upgrade Tasks" {
+		color=lightpink fillcolor=lightpink label="Post-Upgrade Tasks" style=filled
+		VerifyServices [label="Verify Services"]
+		MonitorPerformance [label="Monitor Performance"]
+		UpdateDocumentation [label="Update Documentation"]
+	}
+	subgraph cluster_Dependencies {
+		color=violet fillcolor=violet label=Dependencies style=filled
+		LicenseKey [label="License Key"]
+		SSLCertificates [label="SSL Certificates"]
+		NetworkAccess [label="Network Access"]
+	}
+	subgraph cluster_Users {
+		color=gold fillcolor=gold label=Users style=filled
+		AdminAlice [label="Admin Alice"]
+		ChangeManagerBob [label="Change Manager Bob"]
+		NetworkTeam [label="Network Team"]
+	}
+	subgraph cluster_Documentation {
+		color=lightgray fillcolor=lightgray label=Documentation style=filled
+		"UpgradeGuide13.1" [label="Upgrade Guide 13.1"]
+		"ReleaseNotes13.1" [label="Release Notes 13.1"]
+		KnownIssues [label="Known Issues"]
+	}
+	subgraph cluster_Events {
+		color=tan fillcolor=tan label=Events style=filled
+		ScheduledDowntime [label="Scheduled Downtime"]
+		ApprovalGranted [label="Approval Granted"]
+		UserNotification [label="User Notification"]
+	}
+	subgraph "cluster_Logs & Monitoring" {
+		color=lightblue fillcolor=lightblue label="Logs & Monitoring" style=filled
+		UpgradeLogs [label="Upgrade Logs"]
+		SystemLogs [label="System Logs"]
+		PerformanceMetrics [label="Performance Metrics"]
+	}
+	NetScaler1 -> "Firmware12.1" [label="is currently running"]
+	NetScaler2 -> "Firmware12.1" [label="is currently running"]
+	"Firmware12.1" -> "Firmware13.0" [label="upgrades to"]
+	"Firmware13.0" -> "Firmware13.1" [label="upgrades to"]
+	NetScaler1 -> "Firmware13.1" [label="will be upgraded to"]
+	NetScaler2 -> "Firmware13.0" [label="will be upgraded to"]
+	"Firmware13.0" -> "UpgradePackage13.0" [label=requires]
+	"Firmware13.1" -> "UpgradePackage13.1" [label=requires]
+	"UpgradePackage13.1" -> "UpgradeGuide13.1" [label="documented in"]
+	"UpgradePackage13.1" -> "ReleaseNotes13.1" [label="referenced in"]
+	BackupConfigs -> NetScaler1 [label="performed on"]
+	CheckCompatibility -> NetScaler1 [label="performed on"]
+	ObtainApproval -> ChangeManagerBob [label="approved by"]
+	NotifyUsers -> UserNotification [label="results in"]
+	"Firmware13.1" -> LicenseKey [label=requires]
+	"Firmware13.1" -> SSLCertificates [label=uses]
+	"Firmware13.1" -> NetworkAccess [label=needs]
+	VerifyServices -> NetScaler1 [label="performed on"]
+	MonitorPerformance -> NetScaler1 [label="performed on"]
+	UpdateDocumentation -> Documentation [label=updates]
+	AdminAlice -> BackupConfigs [label=performs]
+	AdminAlice -> CheckCompatibility [label=performs]
+	AdminAlice -> VerifyServices [label=performs]
+	AdminAlice -> MonitorPerformance [label=performs]
+	NetworkTeam -> MonitorPerformance [label="assists with"]
+	ChangeManagerBob -> ObtainApproval [label=oversees]
+	ChangeManagerBob -> ApprovalGranted [label=grants]
+	ScheduledDowntime -> NetScaler1 [label=affects]
+	ScheduledDowntime -> AdminAlice [label=notifies]
+	ScheduledDowntime -> ChangeManagerBob [label="approved by"]
+	UpgradeLogs -> SystemLogs [label="integrated into"]
+	MonitorPerformance -> PerformanceMetrics [label=collects]
+	"UpgradeGuide13.1" -> KnownIssues [label=references]
+	"ReleaseNotes13.1" -> KnownIssues [label=mentions]
+}

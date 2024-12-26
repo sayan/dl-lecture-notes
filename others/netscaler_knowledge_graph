@@ -1,0 +1,92 @@
+// NetScaler Knowledge Graph
+digraph {
+	node [fontname=Helvetica fontsize=10 shape=rectangle style=filled]
+	subgraph cluster_Instances {
+		color=skyblue fillcolor=skyblue label=Instances style=filled
+		NetScaler1 [label="NetScaler1
+Model: MPX
+Firmware: 13.1"]
+		NetScaler2 [label="NetScaler2
+Model: VPX
+Firmware: 13.0"]
+	}
+	subgraph cluster_Features {
+		color=lightgreen fillcolor=lightgreen label=Features style=filled
+		LoadBalancing [label="Load Balancing"]
+		SSLOffloading [label="SSL Offloading"]
+		ContentSwitching [label="Content Switching"]
+		GSLB [label="Global Server Load Balancing"]
+		Authentication [label=Authentication]
+	}
+	subgraph cluster_Configurations {
+		color=orange fillcolor=orange label=Configurations style=filled
+		VirtualServer1 [label="Virtual Server 1
+(Load Balancing)"]
+		VirtualServer2 [label="Virtual Server 2
+(SSL Offloading)"]
+		Policy1 [label="Content Switching Policy 1"]
+		Profile1 [label="SSL Profile 1"]
+	}
+	subgraph cluster_Dependencies {
+		color=violet fillcolor=violet label=Dependencies style=filled
+		LicenseEnterprise [label="Enterprise License"]
+		SSL_Cert1 [label="SSL Certificate 1"]
+		ExternalAuthServer [label="External Auth Server"]
+	}
+	subgraph cluster_Users {
+		color=gold fillcolor=gold label=Users style=filled
+		AdminAlice [label="Admin Alice
+Role: Super Admin"]
+		OperatorBob [label="Operator Bob
+Role: Network Operator"]
+	}
+	subgraph cluster_Documentation {
+		color=lightgray fillcolor=lightgray label=Documentation style=filled
+		ConfigGuideLB [label="Config Guide - Load Balancing"]
+		BestPracticesSSL [label="Best Practices - SSL"]
+	}
+	subgraph "cluster_Network Elements" {
+		color=lightcoral fillcolor=lightcoral label="Network Elements" style=filled
+		BackendServer1 [label="Backend Server 1"]
+		BackendServer2 [label="Backend Server 2"]
+		ClientNetwork [label="Client Network"]
+		DMZInterface [label="DMZ Interface"]
+	}
+	subgraph cluster_Monitoring {
+		color=lightpink fillcolor=lightpink label=Monitoring style=filled
+		SysLogs [label="System Logs"]
+		MetricsDashboard [label="Metrics Dashboard"]
+		Alerts [label=Alerts]
+	}
+	NetScaler1 -> LoadBalancing [label=supports]
+	NetScaler1 -> SSLOffloading [label=supports]
+	NetScaler1 -> ContentSwitching [label=supports]
+	NetScaler2 -> GSLB [label=supports]
+	NetScaler2 -> Authentication [label=supports]
+	LoadBalancing -> VirtualServer1 [label="configured with"]
+	SSLOffloading -> VirtualServer2 [label="configured with"]
+	ContentSwitching -> Policy1 [label=uses]
+	SSLOffloading -> Profile1 [label=applies]
+	VirtualServer2 -> SSL_Cert1 [label=uses]
+	Profile1 -> SSL_Cert1 [label=includes]
+	Authentication -> ExternalAuthServer [label="integrates with"]
+	NetScaler1 -> LicenseEnterprise [label=requires]
+	NetScaler2 -> LicenseEnterprise [label=requires]
+	VirtualServer1 -> BackendServer1 [label="load balances"]
+	VirtualServer1 -> BackendServer2 [label="load balances"]
+	VirtualServer2 -> BackendServer2 [label="offloads SSL to"]
+	ClientNetwork -> NetScaler1 [label=accesses]
+	NetScaler1 -> DMZInterface [label="connects via"]
+	AdminAlice -> NetScaler1 [label=manages]
+	OperatorBob -> NetScaler2 [label=monitors]
+	ConfigGuideLB -> LoadBalancing [label=documents]
+	BestPracticesSSL -> SSLOffloading [label=covers]
+	NetScaler1 -> SysLogs [label=generates]
+	NetScaler1 -> MetricsDashboard [label="provides data to"]
+	Alerts -> AdminAlice [label=notifies]
+	Alerts -> OperatorBob [label=notifies]
+	BackendServer1 -> DMZInterface [label="connected via"]
+	BackendServer2 -> DMZInterface [label="connected via"]
+	SysLogs -> Alerts [label=triggers]
+	MetricsDashboard -> OperatorBob [label="viewed by"]
+}

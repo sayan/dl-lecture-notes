@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.43">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Deep Learning Notes – pytorch_bptt</title>
+<title>Vanilla Recurrent Neural Network – Deep Learning Notes</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -174,193 +174,219 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#forward-pass" id="toc-forward-pass" class="nav-link active" data-scroll-target="#forward-pass">Forward Pass</a></li>
+  <li><a href="#forward-equations-over-time" id="toc-forward-equations-over-time" class="nav-link" data-scroll-target="#forward-equations-over-time">Forward equations over time</a></li>
+  <li><a href="#backward-pass" id="toc-backward-pass" class="nav-link" data-scroll-target="#backward-pass">Backward Pass</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Vanilla Recurrent Neural Network</h1>
+</div>
 
 
 
-<div id="cell-0" class="cell" data-execution_count="11">
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="cell-1" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>seq_length <span class="op">=</span> <span class="dv">20</span>  <span class="co"># Length of each input sequence</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>num_sequences <span class="op">=</span> <span class="dv">100</span>  <span class="co"># Number of sequences</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>noise_level <span class="op">=</span> <span class="fl">0.1</span>  <span class="co"># Add some noise to the sine wave</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a sine wave</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">100</span>, num_sequences <span class="op">*</span> seq_length)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>sine_wave <span class="op">=</span> np.sin(x) <span class="op">+</span> noise_level <span class="op">*</span> np.random.randn(<span class="op">*</span>x.shape)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Create sequences and targets</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>input_sequences <span class="op">=</span> []</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>target_values <span class="op">=</span> []</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(sine_wave) <span class="op">-</span> seq_length):</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    sequence <span class="op">=</span> sine_wave[i:i <span class="op">+</span> seq_length]</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    target <span class="op">=</span> sine_wave[i <span class="op">+</span> seq_length]</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    input_sequences.append(sequence)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    target_values.append(target)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to numpy arrays</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> np.array(input_sequences)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>targets <span class="op">=</span> np.array(target_values)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting a sample sequence and its target</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>plt.plot(inputs[<span class="dv">0</span>], label<span class="op">=</span><span class="st">'Input Sequence'</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>plt.plot(seq_length, targets[<span class="dv">0</span>], <span class="st">'ro'</span>, label<span class="op">=</span><span class="st">'Target'</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Sample Sequence and Target'</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the shapes</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Inputs shape: </span><span class="sc">{</span>inputs<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Targets shape: </span><span class="sc">{</span>targets<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In this article we will go over the math of vanilla recurrent neural network (RNN) and also see how backpropagation through time (BPTT) works. We will also implement a simple RNN from scratch using torch. RNN is a type of neural network that is designed to handle sequential data. It has a hidden state that is updated at each time step and is used to store information about the sequence. The hidden state is updated using the input at the current time step and the hidden state at the previous time step. The output of RNN can be at each time step or at the end of the sequence, or both. Depending on the task, the output can be used for different purposes. Some examples of tasks that RNN can be used for are time series prediction, language modeling, and machine translation. Here we will focus on the math of Simple RNN, both forward and backward pass.</p>
+<p>Lets set up the mathematical notation that we will use in this article. We will use the following notation:</p>
+<ul>
+<li><span class="math inline">\(x_t\)</span> is the input at time step <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(h_t\)</span> is the hidden state at time step <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(y_t\)</span> is the output at time step <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(U\)</span> is the weight matrix for the input <span class="math inline">\(x_t\)</span> to hidden state <span class="math inline">\(h_t\)</span></li>
+<li><span class="math inline">\(W\)</span> is the weight matrix for the hidden state <span class="math inline">\(h_{t-1}\)</span> to hidden state <span class="math inline">\(h_t\)</span></li>
+<li><span class="math inline">\(V\)</span> is the weight matrix for the hidden state <span class="math inline">\(h_t\)</span> to output <span class="math inline">\(y_t\)</span></li>
+<li><span class="math inline">\(b_h\)</span> is the bias for the hidden state <span class="math inline">\(h_t\)</span></li>
+</ul>
+<section id="forward-pass" class="level3">
+<h3 class="anchored" data-anchor-id="forward-pass">Forward Pass</h3>
+<p>In a typical RNN, we use <code>tanh</code> as the activation function in the hidden state and <code>softmax</code> (given a classification problem) as the activation function in the output layer. The equations for the forward pass are as follows:</p>
+<p><span class="math display">\[
+h_t = \tanh(U x_t + W h_{t-1} + b_h)
+\]</span></p>
+<p><span class="math display">\[
+y_t = \text{softmax}(Vh_t)
+\]</span></p>
+<p>Note: U, W, V, and b_h are the parameters of the RNN that are learned during training and the same matrices are used at each time step. Its important to visualise the architecture of RNN in an unfolded manner to understand how the hidden state is updated at each time step. The figure below shows the unfolded RNN for a sequence of length 4.</p>
+<div id="cell-3" class="cell" data-execution_count="131">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graphviz</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> Image</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a directed graph</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>dot <span class="op">=</span> graphviz.Digraph(<span class="bu">format</span><span class="op">=</span><span class="st">'png'</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>dot.attr(rankdir<span class="op">=</span><span class="st">'BT'</span>)  <span class="co"># Set direction from Bottom to Top</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>dot.attr(size<span class="op">=</span><span class="st">'8,12'</span>)  <span class="co"># Adjust size of the graph</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>dot.attr(dpi<span class="op">=</span><span class="st">'150'</span>)    <span class="co"># Increase resolution</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Time steps</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>timesteps <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Node styles</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>node_style <span class="op">=</span> {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'shape'</span>: <span class="st">'circle'</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'style'</span>: <span class="st">'filled'</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fontname'</span>: <span class="st">'Arial'</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fontsize'</span>: <span class="st">'10'</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Create input layer (starting from x_1, skipping x_0)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> dot.subgraph() <span class="im">as</span> s:</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    s.attr(rank<span class="op">=</span><span class="st">'same'</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, timesteps):  <span class="co"># Start input from x_1, not x_0</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        s.node(<span class="ss">f'X</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'x_</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="op">**</span>node_style, color<span class="op">=</span><span class="st">'lightblue'</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Create hidden layer (starting from h_0)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> dot.subgraph() <span class="im">as</span> s:</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    s.attr(rank<span class="op">=</span><span class="st">'same'</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(timesteps):</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        s.node(<span class="ss">f'H</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'h_</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="op">**</span>node_style, color<span class="op">=</span><span class="st">'lightgreen'</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Create output layer (starting from y_1, not y_0)</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> dot.subgraph() <span class="im">as</span> s:</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    s.attr(rank<span class="op">=</span><span class="st">'same'</span>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, timesteps):  <span class="co"># Outputs start from y_1</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        s.node(<span class="ss">f'Y</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'y_</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="op">**</span>node_style, color<span class="op">=</span><span class="st">'lightcoral'</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Add edges for connections between layers</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>edge_style <span class="op">=</span> {<span class="st">'fontname'</span>: <span class="st">'Arial'</span>, <span class="st">'fontsize'</span>: <span class="st">'10'</span>, <span class="st">'len'</span>: <span class="st">'1.5'</span>}</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, timesteps):  <span class="co"># Start connections from x_1 (no x_0)</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Input to hidden connections (U)</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    dot.edge(<span class="ss">f'X</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'H</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, label<span class="op">=</span><span class="st">'U'</span>, color<span class="op">=</span><span class="st">'blue'</span>, <span class="op">**</span>edge_style)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Hidden to output connections (V)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    dot.edge(<span class="ss">f'H</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'Y</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, label<span class="op">=</span><span class="st">'V'</span>, color<span class="op">=</span><span class="st">'red'</span>, <span class="op">**</span>edge_style)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Recurrent connections between hidden states (W)</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, timesteps):</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    dot.edge(<span class="ss">f'H</span><span class="sc">{</span>t<span class="op">-</span><span class="dv">1</span><span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'H</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">'</span>, label<span class="op">=</span><span class="st">'W'</span>, color<span class="op">=</span><span class="st">'green'</span>, style<span class="op">=</span><span class="st">'dashed'</span>, <span class="op">**</span>edge_style)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a title</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>dot.attr(label<span class="op">=</span><span class="st">'Unfolded Recurrent Neural Network (RNN)'</span>, labelloc<span class="op">=</span><span class="st">'t'</span>, labeljust<span class="op">=</span><span class="st">'c'</span>, fontsize<span class="op">=</span><span class="st">'12'</span>, fontname<span class="op">=</span><span class="st">'Arial Bold'</span>)</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Render the graph to a file</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>dot.render(<span class="st">'improved_rnn_unfolded_1'</span>, <span class="bu">format</span><span class="op">=</span><span class="st">'png'</span>, cleanup<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the image inside the notebook</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>Image(filename<span class="op">=</span><span class="st">'improved_rnn_unfolded_1.png'</span>)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="131">
 <div>
 <figure class="figure">
-<p><img src="07_pytorch_bptt_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="07_pytorch_bptt_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+</div>
+</section>
+<section id="forward-equations-over-time" class="level3">
+<h3 class="anchored" data-anchor-id="forward-equations-over-time">Forward equations over time</h3>
+<p>We instantiate the hidden state <span class="math inline">\(h_0\)</span> to be zero at the start of the sequence. The forward equations for the RNN over time are as follows:</p>
+<p><span class="math display">\[
+\begin{aligned}
+for \ t &amp;= 1, 2, 3, 4 \\
+z_t &amp;= U x_t + W h_{t-1} + b_h \\
+h_t &amp;= \tanh(z_t) \\
+Y_t &amp;= \text{softmax}(Vh_{t} + b_y)
+\end{aligned}
+\]</span></p>
+</section>
+<section id="backward-pass" class="level3">
+<h3 class="anchored" data-anchor-id="backward-pass">Backward Pass</h3>
+<p>For ease of comprehension, we will start with the many to one RNN architecture. It means we have one output at the end of the sequence. The loss function that we will use is the cross-entropy loss. The cross-entropy loss in that case is given by:</p>
+<p><span class="math display">\[
+L = -\sum_{c=1}^{C} y_c \log(\hat{y}_c)
+\]</span></p>
+<p>where <span class="math inline">\(y_c\)</span> is the true label and <span class="math inline">\(\hat{y}_c\)</span> is the predicted output from the softmax. The loss function is a function of the output at the last time step <span class="math inline">\(y_T\)</span>. The goal of the backward pass is to compute the gradients of the loss function with respect to the parameters of the RNN. The gradients are then used to update the parameters of the RNN using gradient descent. Note the gradient of Loss wrt input to softmax is given by:</p>
+<p><span class="math display">\[
+\frac{\partial L}{\partial a_T} = \hat{y} - y
+\]</span></p>
+<div id="cell-6" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">## Lets create some data points</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of samples = 2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># lets have time steps = 4</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>n_timesteps <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>num_features_in <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>num_features_out <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a random input tensor</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.randn(n_samples, n_timesteps, num_features_in)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> torch.randn(n_samples, n_timesteps, num_features_out)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Lets instantiate U, V, W and the biases. Hidden state is initialized to zero</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>hidden_state_len <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>hidden_state_0 <span class="op">=</span> torch.zeros(n_samples, hidden_state_len)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>U <span class="op">=</span> nn.Linear(num_features_in, hidden_state_len, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>V <span class="op">=</span> nn.Linear(hidden_state_len, num_features_out)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> nn.Linear(hidden_state_len, hidden_state_len, bias<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># # Lets compute the output</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co"># outputs = []</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co"># hidden_state = hidden_state_0</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># for t in range(n_timesteps):</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#     hidden_state = torch.tanh(U(X[:, t, :]) + W(hidden_state))</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#     outputs.append(V(hidden_state))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-7" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">##X[1]</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">## lets process the first sample first</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> X[<span class="dv">1</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(x.shape[<span class="dv">0</span>]):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Time step </span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"X_</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss"> = </span><span class="sc">{</span>x[t]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Inputs shape: (1980, 20)
-Targets shape: (1980,)</code></pre>
+<pre><code>Time step 0
+X_0 = tensor([ 0.3112,  0.4744, -1.0944])
+Time step 1
+X_1 = tensor([-0.2352, -0.4401,  0.2961])
+Time step 2
+X_2 = tensor([ 0.6156, -0.2568,  0.7193])
+Time step 3
+X_3 = tensor([1.0839, 0.6316, 0.6759])</code></pre>
 </div>
 </div>
-<div id="cell-1" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>targets[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>np.float64(0.8287504217341207)</code></pre>
-</div>
-</div>
-<div id="cell-2" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>inputs[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
-<pre><code>array([-0.07627698,  0.11630329,  0.09275376,  0.12201589,  0.24528777,
-        0.13978274,  0.11793534,  0.3809811 ,  0.328718  ,  0.51868583,
-        0.56625821,  0.59849167,  0.55879584,  0.58587118,  0.53824063,
-        0.58548738,  0.80858908,  0.67820918,  0.82501667,  0.72089376])</code></pre>
-</div>
-</div>
-<div id="cell-3" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> mySimpleRNNModule(nn.Module):</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_size, hidden_layer_size, output_size):</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_layer_size <span class="op">=</span> hidden_layer_size</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output_size <span class="op">=</span> output_size</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_to_hidden <span class="op">=</span> nn.Linear(input_size, hidden_layer_size)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hiddent_to_hidden <span class="op">=</span> nn.Linear(hidden_layer_size, hidden_layer_size)</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_to_output <span class="op">=</span> nn.Linear(hidden_layer_size, output_size)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, input_sequence_batch, hidden_state):</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># input_sequence_batch shape: (batch_size, sequence_length)</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># hidden_state shape: (batch_size, hidden_layer_size)</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        batch_size <span class="op">=</span> input_sequence_batch.shape[<span class="dv">0</span>]</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        sequence_length <span class="op">=</span> input_sequence_batch.shape[<span class="dv">1</span>]</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(sequence_length):</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            <span class="bu">input</span> <span class="op">=</span> input_sequence_batch[:, i]</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            hidden_linear <span class="op">=</span> <span class="va">self</span>.input_to_hidden(<span class="bu">input</span>) <span class="op">+</span> <span class="va">self</span>.hiddent_to_hidden(hidden_state)</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            hidden_activation <span class="op">=</span> torch.tanh(hidden_linear)</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> <span class="va">self</span>.hidden_to_output(hidden_activation)</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output, hidden_state</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="cell-4" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Test the model on inputs, targets</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>input_size <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>hidden_layer_size <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>output_size <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize the model</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> mySimpleRNNModule(input_size, hidden_layer_size, output_size)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize the hidden state</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>hidden_state <span class="op">=</span> torch.zeros(<span class="dv">1</span>, hidden_layer_size)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert inputs and targets to PyTorch tensors</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> torch.from_numpy(inputs).<span class="bu">float</span>()</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>targets <span class="op">=</span> torch.from_numpy(targets).<span class="bu">float</span>()</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the output and hidden state</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>output, hidden_state <span class="op">=</span> model(inputs[<span class="dv">0</span>].view(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>), hidden_state)</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Now let's forward pass the entire batch</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>output, hidden_state <span class="op">=</span> model(inputs, hidden_state)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-error">
-<div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">RuntimeError</span>                              Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[14], line 22</span>
-<span class="ansi-green-fg ansi-bold">     19</span> output, hidden_state <span style="color:rgb(98,98,98)">=</span> model(inputs[<span style="color:rgb(98,98,98)">0</span>]<span style="color:rgb(98,98,98)">.</span>view(<span style="color:rgb(98,98,98)">1</span>, <span style="color:rgb(98,98,98)">-</span><span style="color:rgb(98,98,98)">1</span>), hidden_state)
-<span class="ansi-green-fg ansi-bold">     21</span> <span style="font-style:italic;color:rgb(95,135,135)"># Now let's forward pass the entire batch</span>
-<span class="ansi-green-fg">---&gt; 22</span> output, hidden_state <span style="color:rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">model</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">inputs</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">hidden_state</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1736</span>, in <span class="ansi-cyan-fg">Module._wrapped_call_impl</span><span class="ansi-blue-fg">(self, *args, **kwargs)</span>
-<span class="ansi-green-fg ansi-bold">   1734</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_compiled_call_impl(<span style="color:rgb(98,98,98)">*</span>args, <span style="color:rgb(98,98,98)">*</span><span style="color:rgb(98,98,98)">*</span>kwargs)  <span style="font-style:italic;color:rgb(95,135,135)"># type: ignore[misc]</span>
-<span class="ansi-green-fg ansi-bold">   1735</span> <span style="font-weight:bold;color:rgb(0,135,0)">else</span>:
-<span class="ansi-green-fg">-&gt; 1736</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span style="color:rgb(0,135,0)" class="ansi-yellow-bg">self</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_call_impl</span><span class="ansi-yellow-bg">(</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1747</span>, in <span class="ansi-cyan-fg">Module._call_impl</span><span class="ansi-blue-fg">(self, *args, **kwargs)</span>
-<span class="ansi-green-fg ansi-bold">   1742</span> <span style="font-style:italic;color:rgb(95,135,135)"># If we don't have any hooks, we want to skip the rest of the logic in</span>
-<span class="ansi-green-fg ansi-bold">   1743</span> <span style="font-style:italic;color:rgb(95,135,135)"># this function, and just call forward.</span>
-<span class="ansi-green-fg ansi-bold">   1744</span> <span style="font-weight:bold;color:rgb(0,135,0)">if</span> <span style="font-weight:bold;color:rgb(175,0,255)">not</span> (<span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_backward_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_backward_pre_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_forward_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_forward_pre_hooks
-<span class="ansi-green-fg ansi-bold">   1745</span>         <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_backward_pre_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_backward_hooks
-<span class="ansi-green-fg ansi-bold">   1746</span>         <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_forward_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_forward_pre_hooks):
-<span class="ansi-green-fg">-&gt; 1747</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">forward_call</span><span class="ansi-yellow-bg">(</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-fg ansi-bold">   1749</span> result <span style="color:rgb(98,98,98)">=</span> <span style="font-weight:bold;color:rgb(0,135,0)">None</span>
-<span class="ansi-green-fg ansi-bold">   1750</span> called_always_called_hooks <span style="color:rgb(98,98,98)">=</span> <span style="color:rgb(0,135,0)">set</span>()
-
-Cell <span class="ansi-green-fg">In[13], line 21</span>, in <span class="ansi-cyan-fg">mySimpleRNNModule.forward</span><span class="ansi-blue-fg">(self, input_sequence_batch, hidden_state)</span>
-<span class="ansi-green-fg ansi-bold">     19</span> <span style="font-weight:bold;color:rgb(0,135,0)">for</span> i <span style="font-weight:bold;color:rgb(175,0,255)">in</span> <span style="color:rgb(0,135,0)">range</span>(sequence_length):
-<span class="ansi-green-fg ansi-bold">     20</span>     <span style="color:rgb(0,135,0)">input</span> <span style="color:rgb(98,98,98)">=</span> input_sequence_batch[:, i]
-<span class="ansi-green-fg">---&gt; 21</span>     hidden_linear <span style="color:rgb(98,98,98)">=</span> <span style="color:rgb(0,135,0)" class="ansi-yellow-bg">self</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">input_to_hidden</span><span class="ansi-yellow-bg">(</span><span style="color:rgb(0,135,0)" class="ansi-yellow-bg">input</span><span class="ansi-yellow-bg">)</span> <span style="color:rgb(98,98,98)">+</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>hiddent_to_hidden(hidden_state)
-<span class="ansi-green-fg ansi-bold">     22</span>     hidden_activation <span style="color:rgb(98,98,98)">=</span> torch<span style="color:rgb(98,98,98)">.</span>tanh(hidden_linear)
-<span class="ansi-green-fg ansi-bold">     23</span> output <span style="color:rgb(98,98,98)">=</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>hidden_to_output(hidden_activation)
-
-File <span class="ansi-green-fg">~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1736</span>, in <span class="ansi-cyan-fg">Module._wrapped_call_impl</span><span class="ansi-blue-fg">(self, *args, **kwargs)</span>
-<span class="ansi-green-fg ansi-bold">   1734</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_compiled_call_impl(<span style="color:rgb(98,98,98)">*</span>args, <span style="color:rgb(98,98,98)">*</span><span style="color:rgb(98,98,98)">*</span>kwargs)  <span style="font-style:italic;color:rgb(95,135,135)"># type: ignore[misc]</span>
-<span class="ansi-green-fg ansi-bold">   1735</span> <span style="font-weight:bold;color:rgb(0,135,0)">else</span>:
-<span class="ansi-green-fg">-&gt; 1736</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span style="color:rgb(0,135,0)" class="ansi-yellow-bg">self</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_call_impl</span><span class="ansi-yellow-bg">(</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1747</span>, in <span class="ansi-cyan-fg">Module._call_impl</span><span class="ansi-blue-fg">(self, *args, **kwargs)</span>
-<span class="ansi-green-fg ansi-bold">   1742</span> <span style="font-style:italic;color:rgb(95,135,135)"># If we don't have any hooks, we want to skip the rest of the logic in</span>
-<span class="ansi-green-fg ansi-bold">   1743</span> <span style="font-style:italic;color:rgb(95,135,135)"># this function, and just call forward.</span>
-<span class="ansi-green-fg ansi-bold">   1744</span> <span style="font-weight:bold;color:rgb(0,135,0)">if</span> <span style="font-weight:bold;color:rgb(175,0,255)">not</span> (<span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_backward_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_backward_pre_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_forward_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> <span style="color:rgb(0,135,0)">self</span><span style="color:rgb(98,98,98)">.</span>_forward_pre_hooks
-<span class="ansi-green-fg ansi-bold">   1745</span>         <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_backward_pre_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_backward_hooks
-<span class="ansi-green-fg ansi-bold">   1746</span>         <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_forward_hooks <span style="font-weight:bold;color:rgb(175,0,255)">or</span> _global_forward_pre_hooks):
-<span class="ansi-green-fg">-&gt; 1747</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">forward_call</span><span class="ansi-yellow-bg">(</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-fg ansi-bold">   1749</span> result <span style="color:rgb(98,98,98)">=</span> <span style="font-weight:bold;color:rgb(0,135,0)">None</span>
-<span class="ansi-green-fg ansi-bold">   1750</span> called_always_called_hooks <span style="color:rgb(98,98,98)">=</span> <span style="color:rgb(0,135,0)">set</span>()
-
-File <span class="ansi-green-fg">~/personal/sayan_github/dl-lecture-notes/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py:125</span>, in <span class="ansi-cyan-fg">Linear.forward</span><span class="ansi-blue-fg">(self, input)</span>
-<span class="ansi-green-fg ansi-bold">    124</span> <span style="font-weight:bold;color:rgb(0,135,0)">def</span> <span style="color:rgb(0,0,255)">forward</span>(<span style="color:rgb(0,135,0)">self</span>, <span style="color:rgb(0,135,0)">input</span>: Tensor) <span style="color:rgb(98,98,98)">-</span><span style="color:rgb(98,98,98)">&gt;</span> Tensor:
-<span class="ansi-green-fg">--&gt; 125</span>     <span style="font-weight:bold;color:rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">F</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">linear</span><span class="ansi-yellow-bg">(</span><span style="color:rgb(0,135,0)" class="ansi-yellow-bg">input</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span style="color:rgb(0,135,0)" class="ansi-yellow-bg">self</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">weight</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span style="color:rgb(0,135,0)" class="ansi-yellow-bg">self</span><span style="color:rgb(98,98,98)" class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">bias</span><span class="ansi-yellow-bg">)</span>
-
-<span class="ansi-red-fg">RuntimeError</span>: mat1 and mat2 shapes cannot be multiplied (1x1980 and 1x100)</pre>
-</div>
-</div>
-</div>
-<div id="cell-5" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
-<pre><code>tensor([[0.4335]], grad_fn=&lt;AddmmBackward0&gt;)</code></pre>
+<div id="cell-8" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>4</code></pre>
 </div>
 </div>
 
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
