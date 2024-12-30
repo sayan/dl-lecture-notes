@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>A note on Jacobian Convention And Shape Convention – Deep Learning Notes</title>
+<title>A note on Logistic Regression – Deep Learning Notes</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -145,25 +145,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#jacobian-convention-and-shape-convention" id="toc-jacobian-convention-and-shape-convention" class="nav-link active" data-scroll-target="#jacobian-convention-and-shape-convention">Jacobian Convention and Shape Convention</a></li>
-  <li><a href="#introduction-to-the-jacobian" id="toc-introduction-to-the-jacobian" class="nav-link" data-scroll-target="#introduction-to-the-jacobian">1. <strong>Introduction to the Jacobian</strong></a></li>
-  <li><a href="#special-case-vector-input-to-scalar-output" id="toc-special-case-vector-input-to-scalar-output" class="nav-link" data-scroll-target="#special-case-vector-input-to-scalar-output">2. <strong>Special Case: Vector Input to Scalar Output</strong></a>
-  <ul class="collapse">
-  <li><a href="#matrix-dimensions" id="toc-matrix-dimensions" class="nav-link" data-scroll-target="#matrix-dimensions">Matrix Dimensions:</a></li>
-  <li><a href="#matrix-dimensions-1" id="toc-matrix-dimensions-1" class="nav-link" data-scroll-target="#matrix-dimensions-1">Matrix Dimensions:</a></li>
-  </ul></li>
-  <li><a href="#comparison-jacobian-vs.-shape-convention" id="toc-comparison-jacobian-vs.-shape-convention" class="nav-link" data-scroll-target="#comparison-jacobian-vs.-shape-convention">3. <strong>Comparison: Jacobian vs.&nbsp;Shape Convention</strong></a>
-  <ul class="collapse">
-  <li><a href="#jacobian" id="toc-jacobian" class="nav-link" data-scroll-target="#jacobian">Jacobian:</a></li>
-  <li><a href="#shape-convention" id="toc-shape-convention" class="nav-link" data-scroll-target="#shape-convention">Shape Convention:</a></li>
-  </ul></li>
-  <li><a href="#practical-example-outer-product-in-gradients" id="toc-practical-example-outer-product-in-gradients" class="nav-link" data-scroll-target="#practical-example-outer-product-in-gradients">4. <strong>Practical Example: Outer Product in Gradients</strong></a>
-  <ul class="collapse">
-  <li><a href="#jacobian-perspective" id="toc-jacobian-perspective" class="nav-link" data-scroll-target="#jacobian-perspective">Jacobian Perspective:</a></li>
-  <li><a href="#shape-convention-1" id="toc-shape-convention-1" class="nav-link" data-scroll-target="#shape-convention-1">Shape Convention:</a></li>
-  <li><a href="#matrix-dimensions-2" id="toc-matrix-dimensions-2" class="nav-link" data-scroll-target="#matrix-dimensions-2">Matrix Dimensions:</a></li>
-  </ul></li>
-  <li><a href="#sources" id="toc-sources" class="nav-link" data-scroll-target="#sources">5. <strong>Sources</strong></a></li>
+  <li><a href="#binary-outcomes-and-probabilities" id="toc-binary-outcomes-and-probabilities" class="nav-link active" data-scroll-target="#binary-outcomes-and-probabilities"><strong>1. Binary Outcomes and Probabilities</strong></a></li>
+  <li><a href="#the-logistic-function" id="toc-the-logistic-function" class="nav-link" data-scroll-target="#the-logistic-function"><strong>2. The Logistic Function</strong></a></li>
+  <li><a href="#odds-and-log-odds-logit-transformation" id="toc-odds-and-log-odds-logit-transformation" class="nav-link" data-scroll-target="#odds-and-log-odds-logit-transformation"><strong>3. Odds and Log-Odds (Logit) Transformation</strong></a></li>
+  <li><a href="#likelihood-function" id="toc-likelihood-function" class="nav-link" data-scroll-target="#likelihood-function"><strong>4. Likelihood Function</strong></a></li>
+  <li><a href="#gradient-of-the-log-likelihood" id="toc-gradient-of-the-log-likelihood" class="nav-link" data-scroll-target="#gradient-of-the-log-likelihood"><strong>5. Gradient of the Log-Likelihood</strong></a></li>
+  <li><a href="#key-characteristics" id="toc-key-characteristics" class="nav-link" data-scroll-target="#key-characteristics"><strong>7. Key Characteristics</strong></a></li>
+  <li><a href="#logistic-regression-mle" id="toc-logistic-regression-mle" class="nav-link" data-scroll-target="#logistic-regression-mle"><strong>Logistic Regression MLE</strong></a></li>
   </ul>
 </nav>
     </div>
@@ -172,7 +160,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">A note on Jacobian Convention And Shape Convention</h1>
+<h1 class="title">A note on Logistic Regression</h1>
 </div>
 
 
@@ -189,113 +177,106 @@ window.Quarto = {
 </header>
 
 
-<section id="jacobian-convention-and-shape-convention" class="level2">
-<h2 class="anchored" data-anchor-id="jacobian-convention-and-shape-convention">Jacobian Convention and Shape Convention</h2>
-</section>
-<section id="introduction-to-the-jacobian" class="level2">
-<h2 class="anchored" data-anchor-id="introduction-to-the-jacobian">1. <strong>Introduction to the Jacobian</strong></h2>
-<p>The Jacobian matrix describes how a vector-valued function changes with respect to its inputs. For a function <span class="math inline">\(\mathbf{f} : \mathbb{R}^n \to \mathbb{R}^m\)</span>, the Jacobian matrix is:</p>
-<p><span class="math display">\[
-\mathbf{J}_{\mathbf{f}} = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} =
-\begin{bmatrix}
-\frac{\partial f_1}{\partial x_1} &amp; \cdots &amp; \frac{\partial f_1}{\partial x_n} \\
-\vdots &amp; \ddots &amp; \vdots \\
-\frac{\partial f_m}{\partial x_1} &amp; \cdots &amp; \frac{\partial f_m}{\partial x_n}
-\end{bmatrix},
+<section id="binary-outcomes-and-probabilities" class="level2">
+<h2 class="anchored" data-anchor-id="binary-outcomes-and-probabilities"><strong>1. Binary Outcomes and Probabilities</strong></h2>
+<p>Logistic regression is used when the output <span class="math inline">\(Y\)</span> is binary, i.e., <span class="math inline">\(Y \in \{0, 1\}\)</span>. The goal is to model the conditional probability <span class="math inline">\(P(Y = 1 | \mathbf{X})\)</span>, where <span class="math inline">\(\mathbf{X}\)</span> is a vector of input features.</p>
+<p>We define: <span class="math display">\[
+p(\mathbf{X}) = P(Y = 1 | \mathbf{X})
 \]</span></p>
-<p>where <span class="math inline">\(\mathbf{f} \in \mathbb{R}^m\)</span>, <span class="math inline">\(\mathbf{x} \in \mathbb{R}^n\)</span>, and <span class="math inline">\(\mathbf{J}_{\mathbf{f}} \in \mathbb{R}^{m \times n}\)</span>.</p>
+<p>So <span class="math inline">\(p(\mathbf{X})\)</span> is the conditional probability of <span class="math inline">\(Y = 1\)</span> given <span class="math inline">\(\mathbf{X}\)</span>. Since probabilities are bounded between 0 and 1, direct modeling using a linear function <span class="math inline">\(\mathbf{X} \cdot \boldsymbol{\beta}\)</span> is unsuitable because it is unbounded.</p>
 <hr>
 </section>
-<section id="special-case-vector-input-to-scalar-output" class="level2">
-<h2 class="anchored" data-anchor-id="special-case-vector-input-to-scalar-output">2. <strong>Special Case: Vector Input to Scalar Output</strong></h2>
-<p>For a scalar-valued function <span class="math inline">\(f : \mathbb{R}^n \to \mathbb{R}\)</span>, the Jacobian reduces to a <strong>gradient row vector</strong>:</p>
-<p><span class="math display">\[
-\mathbf{J}_f = \frac{\partial f}{\partial \mathbf{x}} =
-\begin{bmatrix}
-\frac{\partial f}{\partial x_1} &amp; \frac{\partial f}{\partial x_2} &amp; \cdots &amp; \frac{\partial f}{\partial x_n}
-\end{bmatrix}.
+<section id="the-logistic-function" class="level2">
+<h2 class="anchored" data-anchor-id="the-logistic-function"><strong>2. The Logistic Function</strong></h2>
+<p>To ensure <span class="math inline">\(p(\mathbf{X})\)</span> lies within the range <span class="math inline">\([0, 1]\)</span>, the <strong>logistic function</strong> is used: <span class="math display">\[
+p(\mathbf{X}) = \frac{1}{1 + e^{-(\beta_0 + \mathbf{X} \cdot \boldsymbol{\beta})}}
 \]</span></p>
-<section id="matrix-dimensions" class="level3">
-<h3 class="anchored" data-anchor-id="matrix-dimensions">Matrix Dimensions:</h3>
-<ul>
-<li><span class="math inline">\(\mathbf{x} \in \mathbb{R}^n\)</span>,<br>
-</li>
-<li><span class="math inline">\(f \in \mathbb{R}\)</span>,<br>
-</li>
-<li><span class="math inline">\(\mathbf{J}_f \in \mathbb{R}^{1 \times n}\)</span>.</li>
-</ul>
-<p>However, in machine learning, particularly during gradient descent, it is often more convenient to use the <strong>shape convention</strong>, where the gradient is reshaped to match the parameter’s dimensions. For <span class="math inline">\(f : \mathbb{R}^n \to \mathbb{R}\)</span>, this involves representing the gradient as a <strong>column vector</strong>:</p>
-<p><span class="math display">\[
-\text{Shape Convention: } \nabla f =
-\begin{bmatrix}
-\frac{\partial f}{\partial x_1} \\
-\frac{\partial f}{\partial x_2} \\
-\vdots \\
-\frac{\partial f}{\partial x_n}
-\end{bmatrix}.
+<p>Note <strong>Sigmoid Function</strong>: is generally defined as <span class="math inline">\(\frac{1}{1 + e^{-x}}\)</span>. Hence the logistic function is a special case of the sigmoid function, where the linear combination <span class="math inline">\(\beta_0 + \mathbf{X} \cdot \boldsymbol{\beta}\)</span> is used as the input. Hence <span class="math display">\[
+p(\mathbf{X}) = \frac{1}{1 + e^{-(\beta_0 + \mathbf{X} \cdot \boldsymbol{\beta})}}
+= \sigma(\beta_0 + \mathbf{X} \cdot \boldsymbol{\beta})
 \]</span></p>
-</section>
-<section id="matrix-dimensions-1" class="level3">
-<h3 class="anchored" data-anchor-id="matrix-dimensions-1">Matrix Dimensions:</h3>
-<ul>
-<li><span class="math inline">\(\nabla f \in \mathbb{R}^n\)</span>, matching <span class="math inline">\(\mathbf{x}\)</span>’s shape.</li>
-</ul>
+<p>This formulation introduces two components: - <span class="math inline">\(\beta_0\)</span>: The intercept term. - <span class="math inline">\(\boldsymbol{\beta}\)</span>: The coefficient vector corresponding to the features in <span class="math inline">\(\mathbf{X}\)</span>.</p>
+<p>The logistic function transforms the linear combination <span class="math inline">\(z = \beta_0 + \mathbf{X} \cdot \boldsymbol{\beta}\)</span> into a probability.</p>
 <hr>
 </section>
-</section>
-<section id="comparison-jacobian-vs.-shape-convention" class="level2">
-<h2 class="anchored" data-anchor-id="comparison-jacobian-vs.-shape-convention">3. <strong>Comparison: Jacobian vs.&nbsp;Shape Convention</strong></h2>
-<section id="jacobian" class="level3">
-<h3 class="anchored" data-anchor-id="jacobian">Jacobian:</h3>
-<ul>
-<li><strong>Definition</strong>: The Jacobian aligns with the mathematical convention of derivatives and facilitates composition using the chain rule.</li>
-<li><strong>Matrix Dimensions</strong>: <span class="math inline">\(\mathbf{J}_f \in \mathbb{R}^{1 \times n}\)</span> for <span class="math inline">\(f : \mathbb{R}^n \to \mathbb{R}\)</span>.</li>
-<li><strong>Application</strong>: Ideal for computing derivatives in vectorized form; commonly used in symbolic calculus.</li>
-</ul>
-</section>
-<section id="shape-convention" class="level3">
-<h3 class="anchored" data-anchor-id="shape-convention">Shape Convention:</h3>
-<ul>
-<li><strong>Definition</strong>: Adjusts the gradient’s shape to match the input vector or parameter being updated.</li>
-<li><strong>Matrix Dimensions</strong>: <span class="math inline">\(\nabla f \in \mathbb{R}^n\)</span>, matching <span class="math inline">\(\mathbf{x}\)</span>’s shape.</li>
-<li><strong>Application</strong>: Essential in machine learning frameworks for gradient descent updates: <span class="math display">\[
-\mathbf{x} \gets \mathbf{x} - \eta \nabla f,
-\]</span> where <span class="math inline">\(\eta\)</span> is the learning rate.</li>
-</ul>
+<section id="odds-and-log-odds-logit-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="odds-and-log-odds-logit-transformation"><strong>3. Odds and Log-Odds (Logit) Transformation</strong></h2>
+<p>Instead of modeling probabilities directly, logistic regression models the <strong>log-odds</strong>: <span class="math display">\[
+\text{logit}(p(\mathbf{X})) = \log \left( \frac{p(\mathbf{X})}{1 - p(\mathbf{X})} \right) = \beta_0 + \mathbf{X} \cdot \boldsymbol{\beta}
+\]</span></p>
+<p>Here: - <span class="math inline">\(p(\mathbf{X})\)</span> from <span class="math inline">\([0, 1]\)</span> is the conditional probability of <span class="math inline">\(Y = 1\)</span> given <span class="math inline">\(\mathbf{X}\)</span>. - The logit function maps <span class="math inline">\(p(\mathbf{X})\)</span> from <span class="math inline">\([0, 1]\)</span> to <span class="math inline">\((-\infty, \infty)\)</span>, enabling linear modeling.</p>
 <hr>
 </section>
-</section>
-<section id="practical-example-outer-product-in-gradients" class="level2">
-<h2 class="anchored" data-anchor-id="practical-example-outer-product-in-gradients">4. <strong>Practical Example: Outer Product in Gradients</strong></h2>
-<p>Consider a linear transformation <span class="math inline">\(\mathbf{z} = \mathbf{W} \mathbf{x}\)</span>, where <span class="math inline">\(\mathbf{W} \in \mathbb{R}^{m \times n}\)</span>, <span class="math inline">\(\mathbf{x} \in \mathbb{R}^n\)</span>, and <span class="math inline">\(\mathbf{z} \in \mathbb{R}^m\)</span>. Assume a scalar loss function <span class="math inline">\(J\)</span>.</p>
-<section id="jacobian-perspective" class="level3">
-<h3 class="anchored" data-anchor-id="jacobian-perspective">Jacobian Perspective:</h3>
-<p>The Jacobian <span class="math inline">\(\frac{\partial \mathbf{z}}{\partial \mathbf{W}}\)</span> has dimensions <span class="math inline">\(m \times (n \times m)\)</span>, forming a high-dimensional tensor, which is impractical for computation.</p>
-</section>
-<section id="shape-convention-1" class="level3">
-<h3 class="anchored" data-anchor-id="shape-convention-1">Shape Convention:</h3>
-<p>The gradient with respect to <span class="math inline">\(\mathbf{W}\)</span> is reshaped directly: <span class="math display">\[
-\frac{\partial J}{\partial \mathbf{W}} = \delta \mathbf{x}^\top,
-\]</span> where <span class="math inline">\(\delta \in \mathbb{R}^m\)</span> is the backpropagated error.</p>
-</section>
-<section id="matrix-dimensions-2" class="level3">
-<h3 class="anchored" data-anchor-id="matrix-dimensions-2">Matrix Dimensions:</h3>
-<ul>
-<li><span class="math inline">\(\delta \mathbf{x}^\top \in \mathbb{R}^{m \times n}\)</span>, matching <span class="math inline">\(\mathbf{W}\)</span>’s shape.</li>
-</ul>
+<section id="likelihood-function" class="level2">
+<h2 class="anchored" data-anchor-id="likelihood-function"><strong>4. Likelihood Function</strong></h2>
+<p>Logistic regression uses Maximum Likelihood Estimation (MLE) to estimate <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\boldsymbol{\beta}\)</span>. The likelihood for <span class="math inline">\(n\)</span> independent observations <span class="math inline">\(\{(y_i, \mathbf{x}_i)\}\)</span> is: <span class="math display">\[
+L(\beta_0, \boldsymbol{\beta}) = \prod_{i=1}^n p(\mathbf{x}_i)^{y_i} (1 - p(\mathbf{x}_i))^{1 - y_i}
+\]</span></p>
+<p>Taking the natural logarithm (log-likelihood): <span class="math display">\[
+\ell(\beta_0, \boldsymbol{\beta}) = \sum_{i=1}^n \left[ y_i \log(p(\mathbf{x}_i)) + (1 - y_i) \log(1 - p(\mathbf{x}_i)) \right]
+\]</span></p>
 <hr>
 </section>
+<section id="gradient-of-the-log-likelihood" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-of-the-log-likelihood"><strong>5. Gradient of the Log-Likelihood</strong></h2>
+<p>The gradient of the log-likelihood with respect to <span class="math inline">\(\boldsymbol{\beta}\)</span> is: <span class="math display">\[
+\frac{\partial \ell}{\partial \beta_j} = \sum_{i=1}^n \left( y_i - p(\mathbf{x}_i) \right) x_{ij}
+\]</span></p>
+<p>Here: - <span class="math inline">\(p(\mathbf{x}_i) = \frac{1}{1 + e^{-(\beta_0 + \mathbf{x}_i \cdot \boldsymbol{\beta})}}\)</span></p>
+<p>This gradient is used in iterative optimization algorithms, like gradient ascent, to find the parameters <span class="math inline">\(\beta_0, \boldsymbol{\beta}\)</span> that maximize the log-likelihood.</p>
+<hr>
 </section>
-<section id="sources" class="level2">
-<h2 class="anchored" data-anchor-id="sources">5. <strong>Sources</strong></h2>
-<ol type="1">
-<li>CS 224n Lecture Notes: <a href="http://web.stanford.edu/class/cs224n/readings/gradient-notes.pdf">Notes</a>.</li>
-<li>Prof Manning Stanford Yt : <a href="https://www.youtube.com/watch?v=X0Jw4kgaFlg">Youtube Lecture</a>.</li>
-<li>CS 224 N Slides : <a href="https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1184/lectures/lecture5.pdf">Lecture Slides</a>.</li>
-</ol>
+<section id="key-characteristics" class="level2">
+<h2 class="anchored" data-anchor-id="key-characteristics"><strong>7. Key Characteristics</strong></h2>
+<ul>
+<li>Logistic regression not only provides class predictions but also estimates probabilities.</li>
+<li>It models the log-odds linearly, ensuring interpretability and bounded probabilities.</li>
+</ul>
+<p>This mathematical framework underpins logistic regression as a tool for binary classification and probability estimation.</p>
+</section>
+<section id="logistic-regression-mle" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression-mle"><strong>Logistic Regression MLE</strong></h2>
+<p>In logistic regression, the response variable <span class="math inline">\(Y\)</span> is binary <span class="math inline">\(Y \in \{0, 1\}\)</span>. For a given set of features <span class="math inline">\(\mathbf{x}_i\)</span>, the probability of <span class="math inline">\(Y_i = 1\)</span> is modeled using the logistic (sigmoid) function:</p>
+<p><span class="math display">\[
+p(\mathbf{x}_i) = \Pr(Y_i = 1 | \mathbf{x}_i) = \frac{1}{1 + e^{-(\beta_0 + \mathbf{x}_i^\top \boldsymbol{\beta})}}.
+\]</span></p>
+<p>For <span class="math inline">\(Y_i = 0\)</span>, the probability is:</p>
+<p><span class="math display">\[
+\Pr(Y_i = 0 | \mathbf{x}_i) = 1 - p(\mathbf{x}_i).
+\]</span></p>
+<p>Thus, the conditional probability (or likelihood) for a single observation <span class="math inline">\((Y_i, \mathbf{x}_i)\)</span> can be expressed compactly as:</p>
+<p><span class="math display">\[
+\Pr(Y_i | \mathbf{x}_i) = p(\mathbf{x}_i)^{Y_i} \cdot (1 - p(\mathbf{x}_i))^{1 - Y_i}.
+\]</span></p>
+<p>This formulation captures both cases (<span class="math inline">\(Y_i = 1\)</span> and <span class="math inline">\(Y_i = 0\)</span>).</p>
+<hr>
+<section id="joint-probability-of-observations" class="level4">
+<h4 class="anchored" data-anchor-id="joint-probability-of-observations"><strong>Joint Probability of Observations</strong></h4>
+<p>Assuming the observations are independent, the joint probability (likelihood function) for the entire dataset <span class="math inline">\(\{(Y_i, \mathbf{x}_i)\}_{i=1}^n\)</span> is the product of the individual probabilities:</p>
+<p><span class="math display">\[
+L(\beta_0, \boldsymbol{\beta}) = \prod_{i=1}^n \Pr(Y_i | \mathbf{x}_i).
+\]</span></p>
+<p>Substituting the individual likelihood expression:</p>
+<p><span class="math display">\[
+L(\beta_0, \boldsymbol{\beta}) = \prod_{i=1}^n p(\mathbf{x}_i)^{Y_i} (1 - p(\mathbf{x}_i))^{1 - Y_i}.
+\]</span></p>
+<hr>
+</section>
+<section id="log-likelihood-function" class="level4">
+<h4 class="anchored" data-anchor-id="log-likelihood-function"><strong>Log-Likelihood Function</strong></h4>
+<p>To simplify optimization, the log of the likelihood function, known as the log-likelihood, is used:</p>
+<p><span class="math display">\[
+\ell(\beta_0, \boldsymbol{\beta}) = \log L(\beta_0, \boldsymbol{\beta}) = \sum_{i=1}^n \left[ Y_i \log(p(\mathbf{x}_i)) + (1 - Y_i) \log(1 - p(\mathbf{x}_i)) \right].
+\]</span></p>
+<p>Substituting <span class="math inline">\(p(\mathbf{x}_i)\)</span> into this expression:</p>
+<p><span class="math display">\[
+\ell(\beta_0, \boldsymbol{\beta}) = \sum_{i=1}^n \left[ Y_i (\beta_0 + \mathbf{x}_i^\top \boldsymbol{\beta}) - \log(1 + e^{\beta_0 + \mathbf{x}_i^\top \boldsymbol{\beta}}) \right].
+\]</span></p>
+<p>This form is more manageable for numerical optimization.</p>
 
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
