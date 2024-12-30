@@ -149,9 +149,14 @@ window.Quarto = {
   <li><a href="#the-logistic-function" id="toc-the-logistic-function" class="nav-link" data-scroll-target="#the-logistic-function"><strong>2. The Logistic Function</strong></a></li>
   <li><a href="#odds-and-log-odds-logit-transformation" id="toc-odds-and-log-odds-logit-transformation" class="nav-link" data-scroll-target="#odds-and-log-odds-logit-transformation"><strong>3. Odds and Log-Odds (Logit) Transformation</strong></a></li>
   <li><a href="#likelihood-function" id="toc-likelihood-function" class="nav-link" data-scroll-target="#likelihood-function"><strong>4. Likelihood Function</strong></a></li>
-  <li><a href="#gradient-of-the-log-likelihood" id="toc-gradient-of-the-log-likelihood" class="nav-link" data-scroll-target="#gradient-of-the-log-likelihood"><strong>5. Gradient of the Log-Likelihood</strong></a></li>
-  <li><a href="#key-characteristics" id="toc-key-characteristics" class="nav-link" data-scroll-target="#key-characteristics"><strong>7. Key Characteristics</strong></a></li>
   <li><a href="#logistic-regression-mle" id="toc-logistic-regression-mle" class="nav-link" data-scroll-target="#logistic-regression-mle"><strong>Logistic Regression MLE</strong></a></li>
+  <li><a href="#logistic-regression-gradient-descent-update" id="toc-logistic-regression-gradient-descent-update" class="nav-link" data-scroll-target="#logistic-regression-gradient-descent-update">Logistic Regression: Gradient Descent Update</a></li>
+  <li><a href="#step-1-define-the-logistic-sigmoid-function" id="toc-step-1-define-the-logistic-sigmoid-function" class="nav-link" data-scroll-target="#step-1-define-the-logistic-sigmoid-function">Step 1: Define the logistic (sigmoid) function</a></li>
+  <li><a href="#step-2-compute-the-derivative-of-the-logistic-function" id="toc-step-2-compute-the-derivative-of-the-logistic-function" class="nav-link" data-scroll-target="#step-2-compute-the-derivative-of-the-logistic-function">Step 2: Compute the derivative of the logistic function</a></li>
+  <li><a href="#step-3-define-the-cost-function-for-logistic-regression" id="toc-step-3-define-the-cost-function-for-logistic-regression" class="nav-link" data-scroll-target="#step-3-define-the-cost-function-for-logistic-regression">Step 3: Define the cost function for logistic regression</a></li>
+  <li><a href="#step-4-derive-the-gradient-of-the-cost-function" id="toc-step-4-derive-the-gradient-of-the-cost-function" class="nav-link" data-scroll-target="#step-4-derive-the-gradient-of-the-cost-function">Step 4: Derive the gradient of the cost function</a></li>
+  <li><a href="#step-5-gradient-descent-update" id="toc-step-5-gradient-descent-update" class="nav-link" data-scroll-target="#step-5-gradient-descent-update">Step 5: Gradient descent update</a></li>
+  <li><a href="#final-update-equation-summary" id="toc-final-update-equation-summary" class="nav-link" data-scroll-target="#final-update-equation-summary">Final update equation (summary)</a></li>
   </ul>
 </nav>
     </div>
@@ -215,24 +220,6 @@ L(\beta_0, \boldsymbol{\beta}) = \prod_{i=1}^n p(\mathbf{x}_i)^{y_i} (1 - p(\mat
 <p>Taking the natural logarithm (log-likelihood): <span class="math display">\[
 \ell(\beta_0, \boldsymbol{\beta}) = \sum_{i=1}^n \left[ y_i \log(p(\mathbf{x}_i)) + (1 - y_i) \log(1 - p(\mathbf{x}_i)) \right]
 \]</span></p>
-<hr>
-</section>
-<section id="gradient-of-the-log-likelihood" class="level2">
-<h2 class="anchored" data-anchor-id="gradient-of-the-log-likelihood"><strong>5. Gradient of the Log-Likelihood</strong></h2>
-<p>The gradient of the log-likelihood with respect to <span class="math inline">\(\boldsymbol{\beta}\)</span> is: <span class="math display">\[
-\frac{\partial \ell}{\partial \beta_j} = \sum_{i=1}^n \left( y_i - p(\mathbf{x}_i) \right) x_{ij}
-\]</span></p>
-<p>Here: - <span class="math inline">\(p(\mathbf{x}_i) = \frac{1}{1 + e^{-(\beta_0 + \mathbf{x}_i \cdot \boldsymbol{\beta})}}\)</span></p>
-<p>This gradient is used in iterative optimization algorithms, like gradient ascent, to find the parameters <span class="math inline">\(\beta_0, \boldsymbol{\beta}\)</span> that maximize the log-likelihood.</p>
-<hr>
-</section>
-<section id="key-characteristics" class="level2">
-<h2 class="anchored" data-anchor-id="key-characteristics"><strong>7. Key Characteristics</strong></h2>
-<ul>
-<li>Logistic regression not only provides class predictions but also estimates probabilities.</li>
-<li>It models the log-odds linearly, ensuring interpretability and bounded probabilities.</li>
-</ul>
-<p>This mathematical framework underpins logistic regression as a tool for binary classification and probability estimation.</p>
 </section>
 <section id="logistic-regression-mle" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression-mle"><strong>Logistic Regression MLE</strong></h2>
@@ -273,10 +260,121 @@ L(\beta_0, \boldsymbol{\beta}) = \prod_{i=1}^n p(\mathbf{x}_i)^{Y_i} (1 - p(\mat
 \ell(\beta_0, \boldsymbol{\beta}) = \sum_{i=1}^n \left[ Y_i (\beta_0 + \mathbf{x}_i^\top \boldsymbol{\beta}) - \log(1 + e^{\beta_0 + \mathbf{x}_i^\top \boldsymbol{\beta}}) \right].
 \]</span></p>
 <p>This form is more manageable for numerical optimization.</p>
-
-
-
 </section>
+</section>
+<section id="logistic-regression-gradient-descent-update" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression-gradient-descent-update">Logistic Regression: Gradient Descent Update</h2>
+<hr>
+</section>
+<section id="step-1-define-the-logistic-sigmoid-function" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-define-the-logistic-sigmoid-function">Step 1: Define the logistic (sigmoid) function</h2>
+<p>The logistic (or sigmoid) function is defined as</p>
+<p><span class="math display">\[
+\sigma(z) = \frac{1}{1 + e^{-z}}.
+\]</span> In code or notation, we often write <span class="math inline">\(h_\theta(x) = \sigma(\theta^T x)\)</span>.</p>
+<hr>
+</section>
+<section id="step-2-compute-the-derivative-of-the-logistic-function" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-compute-the-derivative-of-the-logistic-function">Step 2: Compute the derivative of the logistic function</h2>
+<p>We need the derivative of <span class="math inline">\(\sigma(z)\)</span> with respect to <span class="math inline">\(z\)</span>. Recall that</p>
+<p><span class="math display">\[
+\sigma(z) = \frac{1}{1 + e^{-z}}, \quad
+1 - \sigma(z) = 1 - \frac{1}{1 + e^{-z}} = \frac{e^{-z}}{1 + e^{-z}}.
+\]</span></p>
+<p>Hence,</p>
+<p><span class="math display">\[
+\frac{d}{dz}\sigma(z) \;=\; \sigma(z)\,\bigl(1 - \sigma(z)\bigr).
+\]</span></p>
+<hr>
+</section>
+<section id="step-3-define-the-cost-function-for-logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-define-the-cost-function-for-logistic-regression">Step 3: Define the cost function for logistic regression</h2>
+<p>In logistic regression, we use the following <strong>cost function</strong> (negative log-likelihood):</p>
+<p><span class="math display">\[
+J(\theta) = -\frac{1}{m}\sum_{i=1}^m \Bigl[y^{(i)} \ln\!\bigl(h_\theta(x^{(i)})\bigr)
+\;+\; \bigl(1 - y^{(i)}\bigr)\,\ln\!\bigl(1 - h_\theta(x^{(i)})\bigr)\Bigr],
+\]</span></p>
+<p>where <span class="math display">\[
+h_\theta(x^{(i)}) = \sigma\!\bigl(\theta^T x^{(i)}\bigr).
+\]</span> Here, <span class="math inline">\(m\)</span> is the number of training examples, <span class="math inline">\(x^{(i)}\)</span> is the feature vector of the <span class="math inline">\(i\)</span>th example, and <span class="math inline">\(y^{(i)}\)</span> is the corresponding label (<span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>).</p>
+<hr>
+</section>
+<section id="step-4-derive-the-gradient-of-the-cost-function" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-derive-the-gradient-of-the-cost-function">Step 4: Derive the gradient of the cost function</h2>
+<p>We want the gradient of $ J() $ with respect to each parameter $ _j $. Let’s compute</p>
+<p><span class="math display">\[
+\frac{\partial}{\partial \theta_j} J(\theta).
+\]</span></p>
+<ol type="1">
+<li>Start with the cost function term by term:</li>
+</ol>
+<p><span class="math display">\[
+   J(\theta) = -\frac{1}{m}\sum_{i=1}^m
+   \Bigl[y^{(i)} \ln\!\bigl(h_\theta(x^{(i)})\bigr)
+   \;+\; \bigl(1 - y^{(i)}\bigr)\,\ln\!\bigl(1 - h_\theta(x^{(i)})\bigr)\Bigr].
+  \]</span></p>
+<ol start="2" type="1">
+<li><p>Notice that <span class="math inline">\(h_\theta(x^{(i)}) = \sigma(\theta^T x^{(i)})\)</span>.<br>
+Let <span class="math inline">\(z^{(i)} = \theta^T x^{(i)}\)</span>. Then <span class="math inline">\(h_\theta(x^{(i)}) = \sigma(z^{(i)})\)</span>.</p></li>
+<li><p>When we differentiate, we use the chain rule. For a single training example, consider the derivative of <span class="math display">\[
+-\Bigl[y^{(i)}\ln\!\bigl(\sigma(z^{(i)})\bigr)
++ (1 - y^{(i)})\ln\!\bigl(1 - \sigma(z^{(i)})\bigr)\Bigr].
+\]</span> The result (after simplification) is: <span class="math display">\[
+\sigma(z^{(i)}) - y^{(i)}.
+\]</span></p></li>
+<li><p>Finally, we multiply by <span class="math inline">\(x_j^{(i)}\)</span> (the derivative of <span class="math inline">\(z^{(i)} = \theta^T x^{(i)}\)</span> with respect to <span class="math inline">\(\theta_j\)</span>), then sum over all <span class="math inline">\(i\)</span>, and include the factor <span class="math inline">\(\frac{1}{m}\)</span> from the cost function:</p></li>
+</ol>
+<p><span class="math display">\[
+   \frac{\partial}{\partial \theta_j} J(\theta)
+   = \frac{1}{m} \sum_{i=1}^m \Bigl(\sigma(\theta^T x^{(i)}) - y^{(i)}\Bigr)\,x_j^{(i)}.
+\]</span></p>
+<p>Hence the <strong>gradient</strong> is:</p>
+<p><span class="math display">\[
+\nabla J(\theta)
+= \frac{1}{m} \sum_{i=1}^m \bigl(h_\theta(x^{(i)}) - y^{(i)})\,x^{(i)}.
+\]</span></p>
+<hr>
+</section>
+<section id="step-5-gradient-descent-update" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-gradient-descent-update">Step 5: Gradient descent update</h2>
+<p>The gradient descent algorithm updates each parameter <span class="math inline">\(\theta_j\)</span> as follows:</p>
+<p><span class="math display">\[
+\theta_j
+:= \theta_j
+\;-\; \alpha \,\frac{\partial}{\partial \theta_j}J(\theta),
+\]</span></p>
+<p>where <span class="math inline">\(\alpha\)</span> is the learning rate (a small positive constant).</p>
+<p>Substituting our expression for <span class="math inline">\(\frac{\partial}{\partial \theta_j}J(\theta)\)</span>, we get:</p>
+<p><span class="math display">\[
+\theta_j
+:= \theta_j
+\;-\; \alpha \;\frac{1}{m}\sum_{i=1}^m \Bigl(h_\theta(x^{(i)}) - y^{(i)}\Bigr)\,x_j^{(i)}.
+\]</span></p>
+<p>Equivalently, in vectorized form:</p>
+<p><span class="math display">\[
+\theta
+:= \theta
+\;-\; \alpha \;\frac{1}{m}\sum_{i=1}^m \Bigl(h_\theta(x^{(i)}) - y^{(i)}\Bigr)\,x^{(i)}.
+\]</span> —</p>
+</section>
+<section id="final-update-equation-summary" class="level2">
+<h2 class="anchored" data-anchor-id="final-update-equation-summary">Final update equation (summary)</h2>
+<ul>
+<li><strong>Hypothesis</strong>: <span class="math inline">\(h_\theta(x) = \sigma(\theta^T x)\)</span> with <span class="math inline">\(\sigma(z) = \frac{1}{1 + e^{-z}}\)</span>.<br>
+</li>
+<li><strong>Gradient</strong>:<br>
+<span class="math display">\[
+\nabla J(\theta) = \frac{1}{m}\sum_{i=1}^m \Bigl(h_\theta(x^{(i)}) - y^{(i)})\,x^{(i)}.
+\]</span></li>
+<li><strong>Update rule</strong> (for each <span class="math inline">\(\theta_j\)</span> or in vector form):<br>
+<span class="math display">\[
+\theta := \theta \;-\; \alpha \nabla J(\theta).
+\]</span></li>
+</ul>
+<p>That’s the derivation of the logistic regression gradient descent update equations!</p>
+
+
+
 </section>
 
 </main> <!-- /main -->

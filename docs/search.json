@@ -119,25 +119,60 @@
     "text": "4. Likelihood Function\nLogistic regression uses Maximum Likelihood Estimation (MLE) to estimate \\(\\beta_0\\) and \\(\\boldsymbol{\\beta}\\). The likelihood for \\(n\\) independent observations \\(\\{(y_i, \\mathbf{x}_i)\\}\\) is: \\[\nL(\\beta_0, \\boldsymbol{\\beta}) = \\prod_{i=1}^n p(\\mathbf{x}_i)^{y_i} (1 - p(\\mathbf{x}_i))^{1 - y_i}\n\\]\nTaking the natural logarithm (log-likelihood): \\[\n\\ell(\\beta_0, \\boldsymbol{\\beta}) = \\sum_{i=1}^n \\left[ y_i \\log(p(\\mathbf{x}_i)) + (1 - y_i) \\log(1 - p(\\mathbf{x}_i)) \\right]\n\\]"
   },
   {
-    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#gradient-of-the-log-likelihood",
-    "href": "neural_network_and_deep_learning/logreg/logreg.html#gradient-of-the-log-likelihood",
-    "title": "A note on Logistic Regression",
-    "section": "5. Gradient of the Log-Likelihood",
-    "text": "5. Gradient of the Log-Likelihood\nThe gradient of the log-likelihood with respect to \\(\\boldsymbol{\\beta}\\) is: \\[\n\\frac{\\partial \\ell}{\\partial \\beta_j} = \\sum_{i=1}^n \\left( y_i - p(\\mathbf{x}_i) \\right) x_{ij}\n\\]\nHere: - \\(p(\\mathbf{x}_i) = \\frac{1}{1 + e^{-(\\beta_0 + \\mathbf{x}_i \\cdot \\boldsymbol{\\beta})}}\\)\nThis gradient is used in iterative optimization algorithms, like gradient ascent, to find the parameters \\(\\beta_0, \\boldsymbol{\\beta}\\) that maximize the log-likelihood."
-  },
-  {
-    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#key-characteristics",
-    "href": "neural_network_and_deep_learning/logreg/logreg.html#key-characteristics",
-    "title": "A note on Logistic Regression",
-    "section": "7. Key Characteristics",
-    "text": "7. Key Characteristics\n\nLogistic regression not only provides class predictions but also estimates probabilities.\nIt models the log-odds linearly, ensuring interpretability and bounded probabilities.\n\nThis mathematical framework underpins logistic regression as a tool for binary classification and probability estimation."
-  },
-  {
     "objectID": "neural_network_and_deep_learning/logreg/logreg.html#logistic-regression-mle",
     "href": "neural_network_and_deep_learning/logreg/logreg.html#logistic-regression-mle",
     "title": "A note on Logistic Regression",
     "section": "Logistic Regression MLE",
     "text": "Logistic Regression MLE\nIn logistic regression, the response variable \\(Y\\) is binary \\(Y \\in \\{0, 1\\}\\). For a given set of features \\(\\mathbf{x}_i\\), the probability of \\(Y_i = 1\\) is modeled using the logistic (sigmoid) function:\n\\[\np(\\mathbf{x}_i) = \\Pr(Y_i = 1 | \\mathbf{x}_i) = \\frac{1}{1 + e^{-(\\beta_0 + \\mathbf{x}_i^\\top \\boldsymbol{\\beta})}}.\n\\]\nFor \\(Y_i = 0\\), the probability is:\n\\[\n\\Pr(Y_i = 0 | \\mathbf{x}_i) = 1 - p(\\mathbf{x}_i).\n\\]\nThus, the conditional probability (or likelihood) for a single observation \\((Y_i, \\mathbf{x}_i)\\) can be expressed compactly as:\n\\[\n\\Pr(Y_i | \\mathbf{x}_i) = p(\\mathbf{x}_i)^{Y_i} \\cdot (1 - p(\\mathbf{x}_i))^{1 - Y_i}.\n\\]\nThis formulation captures both cases (\\(Y_i = 1\\) and \\(Y_i = 0\\)).\n\n\nJoint Probability of Observations\nAssuming the observations are independent, the joint probability (likelihood function) for the entire dataset \\(\\{(Y_i, \\mathbf{x}_i)\\}_{i=1}^n\\) is the product of the individual probabilities:\n\\[\nL(\\beta_0, \\boldsymbol{\\beta}) = \\prod_{i=1}^n \\Pr(Y_i | \\mathbf{x}_i).\n\\]\nSubstituting the individual likelihood expression:\n\\[\nL(\\beta_0, \\boldsymbol{\\beta}) = \\prod_{i=1}^n p(\\mathbf{x}_i)^{Y_i} (1 - p(\\mathbf{x}_i))^{1 - Y_i}.\n\\]\n\n\n\nLog-Likelihood Function\nTo simplify optimization, the log of the likelihood function, known as the log-likelihood, is used:\n\\[\n\\ell(\\beta_0, \\boldsymbol{\\beta}) = \\log L(\\beta_0, \\boldsymbol{\\beta}) = \\sum_{i=1}^n \\left[ Y_i \\log(p(\\mathbf{x}_i)) + (1 - Y_i) \\log(1 - p(\\mathbf{x}_i)) \\right].\n\\]\nSubstituting \\(p(\\mathbf{x}_i)\\) into this expression:\n\\[\n\\ell(\\beta_0, \\boldsymbol{\\beta}) = \\sum_{i=1}^n \\left[ Y_i (\\beta_0 + \\mathbf{x}_i^\\top \\boldsymbol{\\beta}) - \\log(1 + e^{\\beta_0 + \\mathbf{x}_i^\\top \\boldsymbol{\\beta}}) \\right].\n\\]\nThis form is more manageable for numerical optimization."
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#logistic-regression-gradient-descent-update",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#logistic-regression-gradient-descent-update",
+    "title": "A note on Logistic Regression",
+    "section": "Logistic Regression: Gradient Descent Update",
+    "text": "Logistic Regression: Gradient Descent Update"
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#step-1-define-the-logistic-sigmoid-function",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#step-1-define-the-logistic-sigmoid-function",
+    "title": "A note on Logistic Regression",
+    "section": "Step 1: Define the logistic (sigmoid) function",
+    "text": "Step 1: Define the logistic (sigmoid) function\nThe logistic (or sigmoid) function is defined as\n\\[\n\\sigma(z) = \\frac{1}{1 + e^{-z}}.\n\\] In code or notation, we often write \\(h_\\theta(x) = \\sigma(\\theta^T x)\\)."
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#step-2-compute-the-derivative-of-the-logistic-function",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#step-2-compute-the-derivative-of-the-logistic-function",
+    "title": "A note on Logistic Regression",
+    "section": "Step 2: Compute the derivative of the logistic function",
+    "text": "Step 2: Compute the derivative of the logistic function\nWe need the derivative of \\(\\sigma(z)\\) with respect to \\(z\\). Recall that\n\\[\n\\sigma(z) = \\frac{1}{1 + e^{-z}}, \\quad\n1 - \\sigma(z) = 1 - \\frac{1}{1 + e^{-z}} = \\frac{e^{-z}}{1 + e^{-z}}.\n\\]\nHence,\n\\[\n\\frac{d}{dz}\\sigma(z) \\;=\\; \\sigma(z)\\,\\bigl(1 - \\sigma(z)\\bigr).\n\\]"
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#step-3-define-the-cost-function-for-logistic-regression",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#step-3-define-the-cost-function-for-logistic-regression",
+    "title": "A note on Logistic Regression",
+    "section": "Step 3: Define the cost function for logistic regression",
+    "text": "Step 3: Define the cost function for logistic regression\nIn logistic regression, we use the following cost function (negative log-likelihood):\n\\[\nJ(\\theta) = -\\frac{1}{m}\\sum_{i=1}^m \\Bigl[y^{(i)} \\ln\\!\\bigl(h_\\theta(x^{(i)})\\bigr)\n\\;+\\; \\bigl(1 - y^{(i)}\\bigr)\\,\\ln\\!\\bigl(1 - h_\\theta(x^{(i)})\\bigr)\\Bigr],\n\\]\nwhere \\[\nh_\\theta(x^{(i)}) = \\sigma\\!\\bigl(\\theta^T x^{(i)}\\bigr).\n\\] Here, \\(m\\) is the number of training examples, \\(x^{(i)}\\) is the feature vector of the \\(i\\)th example, and \\(y^{(i)}\\) is the corresponding label (\\(0\\) or \\(1\\))."
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#step-4-derive-the-gradient-of-the-cost-function",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#step-4-derive-the-gradient-of-the-cost-function",
+    "title": "A note on Logistic Regression",
+    "section": "Step 4: Derive the gradient of the cost function",
+    "text": "Step 4: Derive the gradient of the cost function\nWe want the gradient of $ J() $ with respect to each parameter $ _j $. Let’s compute\n\\[\n\\frac{\\partial}{\\partial \\theta_j} J(\\theta).\n\\]\n\nStart with the cost function term by term:\n\n\\[\n   J(\\theta) = -\\frac{1}{m}\\sum_{i=1}^m\n   \\Bigl[y^{(i)} \\ln\\!\\bigl(h_\\theta(x^{(i)})\\bigr)\n   \\;+\\; \\bigl(1 - y^{(i)}\\bigr)\\,\\ln\\!\\bigl(1 - h_\\theta(x^{(i)})\\bigr)\\Bigr].\n  \\]\n\nNotice that \\(h_\\theta(x^{(i)}) = \\sigma(\\theta^T x^{(i)})\\).\nLet \\(z^{(i)} = \\theta^T x^{(i)}\\). Then \\(h_\\theta(x^{(i)}) = \\sigma(z^{(i)})\\).\nWhen we differentiate, we use the chain rule. For a single training example, consider the derivative of \\[\n-\\Bigl[y^{(i)}\\ln\\!\\bigl(\\sigma(z^{(i)})\\bigr)\n+ (1 - y^{(i)})\\ln\\!\\bigl(1 - \\sigma(z^{(i)})\\bigr)\\Bigr].\n\\] The result (after simplification) is: \\[\n\\sigma(z^{(i)}) - y^{(i)}.\n\\]\nFinally, we multiply by \\(x_j^{(i)}\\) (the derivative of \\(z^{(i)} = \\theta^T x^{(i)}\\) with respect to \\(\\theta_j\\)), then sum over all \\(i\\), and include the factor \\(\\frac{1}{m}\\) from the cost function:\n\n\\[\n   \\frac{\\partial}{\\partial \\theta_j} J(\\theta)\n   = \\frac{1}{m} \\sum_{i=1}^m \\Bigl(\\sigma(\\theta^T x^{(i)}) - y^{(i)}\\Bigr)\\,x_j^{(i)}.\n\\]\nHence the gradient is:\n\\[\n\\nabla J(\\theta)\n= \\frac{1}{m} \\sum_{i=1}^m \\bigl(h_\\theta(x^{(i)}) - y^{(i)})\\,x^{(i)}.\n\\]"
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#step-5-gradient-descent-update",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#step-5-gradient-descent-update",
+    "title": "A note on Logistic Regression",
+    "section": "Step 5: Gradient descent update",
+    "text": "Step 5: Gradient descent update\nThe gradient descent algorithm updates each parameter \\(\\theta_j\\) as follows:\n\\[\n\\theta_j\n:= \\theta_j\n\\;-\\; \\alpha \\,\\frac{\\partial}{\\partial \\theta_j}J(\\theta),\n\\]\nwhere \\(\\alpha\\) is the learning rate (a small positive constant).\nSubstituting our expression for \\(\\frac{\\partial}{\\partial \\theta_j}J(\\theta)\\), we get:\n\\[\n\\theta_j\n:= \\theta_j\n\\;-\\; \\alpha \\;\\frac{1}{m}\\sum_{i=1}^m \\Bigl(h_\\theta(x^{(i)}) - y^{(i)}\\Bigr)\\,x_j^{(i)}.\n\\]\nEquivalently, in vectorized form:\n\\[\n\\theta\n:= \\theta\n\\;-\\; \\alpha \\;\\frac{1}{m}\\sum_{i=1}^m \\Bigl(h_\\theta(x^{(i)}) - y^{(i)}\\Bigr)\\,x^{(i)}.\n\\] —"
+  },
+  {
+    "objectID": "neural_network_and_deep_learning/logreg/logreg.html#final-update-equation-summary",
+    "href": "neural_network_and_deep_learning/logreg/logreg.html#final-update-equation-summary",
+    "title": "A note on Logistic Regression",
+    "section": "Final update equation (summary)",
+    "text": "Final update equation (summary)\n\nHypothesis: \\(h_\\theta(x) = \\sigma(\\theta^T x)\\) with \\(\\sigma(z) = \\frac{1}{1 + e^{-z}}\\).\n\nGradient:\n\\[\n\\nabla J(\\theta) = \\frac{1}{m}\\sum_{i=1}^m \\Bigl(h_\\theta(x^{(i)}) - y^{(i)})\\,x^{(i)}.\n\\]\nUpdate rule (for each \\(\\theta_j\\) or in vector form):\n\\[\n\\theta := \\theta \\;-\\; \\alpha \\nabla J(\\theta).\n\\]\n\nThat’s the derivation of the logistic regression gradient descent update equations!"
   },
   {
     "objectID": "neural_network_and_deep_learning/loss_functions/logistic_regression_experiments.html",
